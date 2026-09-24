@@ -1,0 +1,57 @@
+[
+  {
+    "id": "senso",
+    "source": "https://www.nobilia.de/en/products/kitchens/natural-scandi/senso-488/",
+    "images": [
+      "/fileadmin/_processed_/5/0/csm_488_senso_gallery_40768fc078.webp",
+      "/fileadmin/_processed_/d/7/csm_488_senso_g1_887151309c.webp",
+      "/fileadmin/_processed_/d/7/csm_488_senso_g1_e7538c5a88.webp",
+      "/fileadmin/_processed_/5/f/csm_488_senso_g2_d483a1f505.webp"
+    ],
+    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+  },
+  {
+    "id": "natura",
+    "source": "https://www.nobilia.de/en/products/kitchens/natural-scandi/natura-744/",
+    "images": [
+      "/fileadmin/_processed_/c/0/csm_744_natura_gallery_88c7a2c653.webp",
+      "/fileadmin/_processed_/b/8/csm_744_natura_g1_facc3fc398.webp",
+      "/fileadmin/_processed_/b/8/csm_744_natura_g1_d244318b34.webp",
+      "/fileadmin/_processed_/0/d/csm_744_natura_g2_597ce899c8.webp"
+    ],
+    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+  },
+  {
+    "id": "riva",
+    "source": "https://www.nobilia.de/en/products/kitchens/modern-kitchens/riva-842/",
+    "images": [
+      "/fileadmin/_processed_/6/3/csm_842_riva_gallery_1c62e7c1c4.webp",
+      "/fileadmin/_processed_/2/c/csm_842_riva_g1_3e5d35f11e.webp",
+      "/fileadmin/_processed_/2/c/csm_842_riva_g1_df9ef1d208.webp",
+      "/fileadmin/_processed_/b/f/csm_842_riva_g2_e0e484cbc2.webp"
+    ],
+    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+  },
+  {
+    "id": "slate",
+    "source": "https://www.nobilia.de/en/products/kitchens/designer-kitchens/senso-491/",
+    "images": [
+      "/fileadmin/_processed_/b/d/csm_491_senso_gallery_e72c83a5ad.webp",
+      "/fileadmin/_processed_/8/b/csm_491_senso_g1_3c28074aed.webp",
+      "/fileadmin/_processed_/8/b/csm_491_senso_g1_d46b1a381e.webp",
+      "/fileadmin/_processed_/8/b/csm_491_senso_g1_b808b221b5.webp"
+    ],
+    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+  },
+  {
+    "id": "easy",
+    "source": "https://www.nobilia.de/en/products/kitchens/designer-kitchens/easytouch-969/",
+    "images": [
+      "/fileadmin/_processed_/5/9/csm_969_easytouch_gallery_5971516969.webp",
+      "/fileadmin/_processed_/a/4/csm_969_easytouch_g1_c79c6c52f9.webp",
+      "/fileadmin/_processed_/a/4/csm_969_easytouch_g1_b3fcc05463.webp",
+      "/fileadmin/_processed_/e/e/csm_969_easytouch_g2_4775b3892f.webp"
+    ],
+    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+  }
+]
