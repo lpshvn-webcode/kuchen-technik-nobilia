@@ -1,6 +1,6 @@
 # Küchen Technik — status before public launch
 
-Demonstration build prepared for GitHub Pages. Forms validate locally and never send or persist personal data. No analytics tracker is installed until the owner supplies the selected service and consent requirements. Robots are noindex/nofollow.
+Demonstration build prepared for GitHub Pages. Inline and modal inquiry forms have been removed. CTA links target #popup1; the owner will supply the published Tilda page or embed code later. No popup is loaded and no personal data is sent or persisted. No analytics tracker is installed until the owner supplies the selected service and consent requirements. Robots are noindex/nofollow.
 
 Required owner inputs:
 - Approved logo files; current wordmarks are typeset placeholders.
@@ -12,6 +12,6 @@ Required owner inputs:
 
 Image sources and unconfirmed usage rights: dist/sources.json. Images are official Nobilia collection illustrations, not salon projects or showroom images.
 
-Implemented: responsive landing, five verified collections with modal galleries, three visual moods, context transfer, local form validation, keyboard dialogs, menu, tabs, FAQ, reduced motion, local Manrope fonts and license.
+Implemented: responsive landing, five verified collections with modal galleries, three visual moods, context transfer, compact process and warranty sections, prominent benefits, SVG arrows, keyboard dialogs, menu, tabs, FAQ, reduced motion, local Manrope fonts and license.
 
 WebMCP select_kitchen_mood validated through a browser-supported context: valid warm selected NATURA 744; invalid value rejected.
