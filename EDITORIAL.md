@@ -14,4 +14,4 @@ Image sources and unconfirmed usage rights: dist/sources.json. Images are offici
 
 Implemented: responsive landing, five verified collections with modal galleries, three visual moods, context transfer, compact process and warranty sections, prominent benefits, SVG arrows, keyboard dialogs, menu, tabs, FAQ, reduced motion, local Manrope fonts and license.
 
-WebMCP select_kitchen_mood validated through a browser-supported context: valid warm selected NATURA 744; invalid value rejected.
+Configurator visuals are AI-generated demonstration assets, not Nobilia collections. Replace the three aligned images when the owner supplies kitchen photos. Zone boundaries are set in refinements.css. WebMCP select_kitchen_material selects one finish in one zone without submitting an inquiry.

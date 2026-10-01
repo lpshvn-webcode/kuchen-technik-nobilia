@@ -23,29 +23,55 @@ function updateCarousel(){const cards=$$('.collection-card');const left=track.ge
 track.addEventListener('scroll',updateCarousel,{passive:true});addEventListener('resize',updateCarousel);updateCarousel();
 function moveCarousel(dir){track.scrollBy({left:dir*($('.collection-card').getBoundingClientRect().width+parseFloat(getComputedStyle(track).gap)),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'})}
 $('#prev').onclick=()=>moveCarousel(-1);$('#next').onclick=()=>moveCarousel(1);
-const state={model:null,mood:null,source:'contact',type:'estimate',interest:null};
+const state={model:null,configuration:null,source:'contact',type:'estimate',interest:null};
 let lastGalleryTrigger=null;
 function openGallery(id,trigger){const m=models.find(x=>x.id===id);if(!m)throw Error('Unknown collection');lastGalleryTrigger=trigger||lastGalleryTrigger;$('#gallery-content').innerHTML=`<img class="gallery-image" src="${m.id}.webp" alt="Кухня Nobilia ${m.name}"><div class="gallery-body"><p class="eyebrow">КОЛЛЕКЦИЯ NOBILIA</p><h2 id="gallery-title">${m.name}</h2><p>${m.description}</p><p><strong>Фасад:</strong> ${m.code}</p><div class="gallery-thumbnails" role="group" aria-label="Фотографии ${m.name}">${['','-1','-3'].map((suffix,i)=>`<button data-gallery-src="${m.id}${suffix}.webp" aria-label="Фото ${i+1}" aria-pressed="${i===0}"><img src="${m.id}${suffix}.webp" alt="Ракурс ${i+1}" width="90" height="55"></button>`).join('')}</div><a class="button" href="#popup1" data-popup="estimate" data-source="collection" data-gallery-estimate="${m.id}">Рассчитать такую кухню <svg class="ui-arrow" viewBox="0 0 32 32" aria-hidden="true" focusable="false"><path d="M6 26 26 6M15 6h11v11"/></svg></a><p class="gallery-source">Фото и пример комплектации: <a href="https://www.nobilia.de/en/products/kitchens/${m.path}/" target="_blank" rel="noopener">Nobilia</a>. Это коллекция производителя, не реализованный проект салона. Комплектация определяется индивидуально.</p><p id="gallery-status" role="status" class="small"></p></div>`;showDialog($('#gallery'));}
 $('#gallery').addEventListener('close',()=>{if(lastGalleryTrigger?.isConnected)lastGalleryTrigger.focus({preventScroll:true})});
 let imageRequest=0;
 async function swapImage(target,src,status){const token=++imageRequest;status.textContent='Загружаем фотографию…';return new Promise(resolve=>{const image=new Image();image.onload=()=>{if(token!==imageRequest)return resolve(false);target.src=src;status.textContent='';resolve(true)};image.onerror=()=>{if(token!==imageRequest)return resolve(false);status.replaceChildren(document.createTextNode('Не удалось загрузить фотографию. '));const retry=document.createElement('button');retry.className='plain';retry.textContent='Повторить';retry.onclick=()=>swapImage(target,src,status);status.append(retry);resolve(false)};image.src=src})}
-const moods={light:{title:'Светлое и спокойное',label:'Светлое',model:'senso',desc:'Мягкий белый, естественный свет и ощущение простора. Простая основа для жизни, наполненной деталями.'},warm:{title:'Тёплое и естественное',label:'Тёплое',model:'natura',desc:'Выразительная древесная фактура и тёплые оттенки. Пространство, в котором хочется задержаться.'},contrast:{title:'Глубокое и выразительное',label:'Контрастное',model:'slate',desc:'Матовый серый и выразительная геометрия. Спокойный контраст, который раскрывает архитектуру кухни.'}};
-async function selectMood(key){const m=moods[key];if(!m)throw Error('Неизвестное направление');const model=models.find(x=>x.id===m.model);const ok=await swapImage($('#mood-image'),`${m.model}.webp`,$('#mood-status'));if(!ok)return{status:'image_error'};state.mood=key;$('#mood-image').alt=`${m.label} направление — Nobilia ${model.name}`;$('#mood-title').textContent=m.title;$('#mood-desc').textContent=m.desc;$('#mood-model').textContent=model.name;$('#mood-summary').textContent=`${m.label} направление · ${model.name}`;$$('[data-mood]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mood===key)));syncContext();return{status:'selected',mood:key,collection:model.name}}
-const tabText={front:'Матовые поверхности, древесные и каменные фактуры. Сравним образцы при разном освещении и найдём сочетание для вашего интерьера.',plan:'Линейная кухня, угловая композиция или остров. Продумываем рабочие зоны, проходы и расположение техники с учётом размеров вашего помещения.',storage:'Порядок начинается с удобного хранения. Подберём расположение ящиков и шкафов, а наполнение согласуем с вашими привычками и комплектацией.'};
-function setTab(button){$$('[data-tab]').forEach(b=>{const selected=b===button;b.setAttribute('aria-selected',String(selected));b.tabIndex=selected?0:-1});$('#material-tabpanel').setAttribute('aria-labelledby',button.id);$('#material-tabpanel').innerHTML=`<p>${tabText[button.dataset.tab]}</p>`}
-$$('[data-tab]').forEach((button,i)=>{button.onclick=()=>setTab(button);button.onkeydown=e=>{if(['ArrowRight','ArrowLeft','Home','End'].includes(e.key)){e.preventDefault();const buttons=$$('[data-tab]');const index=e.key==='Home'?0:e.key==='End'?2:(i+(e.key==='ArrowRight'?1:2))%3;buttons[index].focus();setTab(buttons[index])}}});
-function syncContext(){const model=models.find(x=>x.id===state.model);const mood=moods[state.mood];$$('.selection-context').forEach(el=>{el.classList.toggle('active',!!model||!!mood||!!state.interest);el.innerHTML=`<div><strong>Ваш выбор</strong><button type="button" data-clear>Очистить</button></div>${model?`<p>Коллекция: ${model.name} · <button type="button" data-return-model="${model.id}">Посмотреть</button></p>`:''}${mood?`<p>Направление: ${mood.label}</p>`:''}${state.interest?'<p>Кухня с техникой</p>':''}`})}
+// All assets share one camera; each image is clipped to its own material zone.
+const finishes=[
+ {id:'milk',src:'config-milk.png',cabinet:'Молочный матовый',stone:'Камень · Светлый',short:'Молочный',stoneShort:'Светлый камень'},
+ {id:'oak',src:'config-oak.png',cabinet:'Натуральный дуб',stone:'Камень · Графит',short:'Натуральный дуб',stoneShort:'Графит'},
+ {id:'olive',src:'config-olive.png',cabinet:'Олива матовая',stone:'Камень · Травертин',short:'Олива',stoneShort:'Травертин'}
+];
+const configuration={upper:0,middle:0,lower:0};
+const zoneNames={upper:'Верхние фасады',middle:'Столешница и фартук',lower:'Нижние фасады'};
+const zoneRequests={upper:0,middle:0,lower:0};
+function configText(){return `${finishes[configuration.upper].short} / ${finishes[configuration.middle].stoneShort} / ${finishes[configuration.lower].short}`}
+function configDetails(){return Object.fromEntries(Object.keys(configuration).map(zone=>[zone,finishes[configuration[zone]].id]))}
+function refreshConfiguration(){
+ for(const zone of Object.keys(configuration)) $('#finish-'+zone).textContent=finishes[configuration[zone]][zone==='middle'?'stone':'cabinet'];
+ $('#config-combination').textContent=configText();
+ state.configuration=configDetails();syncContext();
+}
+async function selectFinish(zone,index){
+ if(!Object.hasOwn(configuration,zone)||!Number.isInteger(index)||index<0||index>=finishes.length)throw Error('Unknown material');
+ const token=++zoneRequests[zone];
+ const buttons=$$(`[data-zone="${zone}"]`);buttons.forEach(b=>b.disabled=true);
+ $('#config-status').textContent='Загружаем материал…';
+ try {
+  await new Promise((resolve,reject)=>{const image=new Image();image.onload=resolve;image.onerror=reject;image.src=finishes[index].src});
+  if(token!==zoneRequests[zone])return;
+  $('#config-'+zone).src=finishes[index].src;configuration[zone]=index;refreshConfiguration();
+  $('#config-status').textContent=`${zoneNames[zone]}: ${finishes[index][zone==='middle'?'stone':'cabinet']}`;
+ } catch {$('#config-status').textContent='Не удалось загрузить материал. Нажмите стрелку, чтобы повторить.'}
+ finally {if(token===zoneRequests[zone])buttons.forEach(b=>b.disabled=false)}
+ return configDetails();
+}
+$$('[data-zone]').forEach(button=>button.addEventListener('click',()=>{const zone=button.dataset.zone;selectFinish(zone,(configuration[zone]+Number(button.dataset.direction)+finishes.length)%finishes.length)}));
+function syncContext(){const model=models.find(x=>x.id===state.model);$$('.selection-context').forEach(el=>{el.classList.toggle('active',!!model||!!state.configuration||!!state.interest);el.innerHTML=`<div><strong>Ваш выбор</strong><button type="button" data-clear>Очистить</button></div>${model?`<p>Коллекция: ${model.name} · <button type="button" data-return-model="${model.id}">Посмотреть</button></p>`:''}${state.configuration?`<p>Сочетание: ${configText()}</p>`:''}${state.interest?'<p>Кухня с техникой</p>':''}`})}
 // The Tilda popup markup/runtime will be supplied separately. Keep the exact
 // user-provided anchor; do not replace it with a simulated lead form.
 function stageInquiry(type,source,interest){
   state.type=type;state.source=source||'contact';state.interest=interest||null;
-  if(source==='materials'&&!state.mood)state.mood='light';
+  if(source==='materials')state.configuration=configDetails();
   $$('dialog[open]').forEach(d=>d.close());syncContext();
   window.kuchenInquiryContext={...state};
   document.dispatchEvent(new CustomEvent('kuchen:inquiry',{detail:{...state}}));
 }
 function openPrivacy(){const p=$('#privacy');showDialog(p)}
 $('#privacy').addEventListener('close',()=>{if($('dialog[open]'))document.body.classList.add('modal-open')});
-document.addEventListener('click',e=>{const model=e.target.closest('[data-model]');if(model)openGallery(model.dataset.model,model);const inquiry=e.target.closest('[data-popup]');if(inquiry){if(inquiry.dataset.galleryEstimate)state.model=inquiry.dataset.galleryEstimate;stageInquiry(inquiry.dataset.popup,inquiry.dataset.source,inquiry.dataset.interest)}const thumb=e.target.closest('[data-gallery-src]');if(thumb)swapImage($('.gallery-image'),thumb.dataset.gallerySrc,$('#gallery-status')).then(ok=>{if(ok)$$('[data-gallery-src]').forEach(b=>b.setAttribute('aria-pressed',String(b===thumb)))});const mood=e.target.closest('[data-mood]');if(mood)selectMood(mood.dataset.mood);if(e.target.closest('[data-clear]')){state.model=null;state.mood=null;state.interest=null;syncContext()};const back=e.target.closest('[data-return-model]');if(back)openGallery(back.dataset.returnModel,back);if(e.target.closest('#privacy-open'))openPrivacy()});
+document.addEventListener('click',e=>{const model=e.target.closest('[data-model]');if(model)openGallery(model.dataset.model,model);const inquiry=e.target.closest('[data-popup]');if(inquiry){if(inquiry.dataset.galleryEstimate)state.model=inquiry.dataset.galleryEstimate;stageInquiry(inquiry.dataset.popup,inquiry.dataset.source,inquiry.dataset.interest)}const thumb=e.target.closest('[data-gallery-src]');if(thumb)swapImage($('.gallery-image'),thumb.dataset.gallerySrc,$('#gallery-status')).then(ok=>{if(ok)$$('[data-gallery-src]').forEach(b=>b.setAttribute('aria-pressed',String(b===thumb)))});if(e.target.closest('[data-clear]')){state.model=null;state.configuration=null;state.interest=null;syncContext()};const back=e.target.closest('[data-return-model]');if(back)openGallery(back.dataset.returnModel,back);if(e.target.closest('#privacy-open'))openPrivacy()});
 const contactObserver=new IntersectionObserver(entries=>{$('.mobile-bottom').classList.toggle('hidden',entries[0].isIntersecting)},{threshold:.1});contactObserver.observe($('#contact'));
-if(document.modelContext?.registerTool){const lifecycle=new AbortController();addEventListener('pagehide',()=>lifecycle.abort(),{once:true});try{Promise.resolve(document.modelContext.registerTool({name:'select_kitchen_mood',title:'Выбрать направление кухни',description:'Выбрать визуальное направление и обновить изображение и контекст формы. Не отправляет заявку.',inputSchema:{type:'object',properties:{mood:{type:'string',enum:['light','warm','contrast']}},required:['mood'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute:async input=>{if(!input||typeof input!=='object'||Object.keys(input).some(k=>k!=='mood')||!Object.hasOwn(moods,input.mood))throw Error('Invalid mood');return selectMood(input.mood)}},{signal:lifecycle.signal})).catch(()=>{})}catch{}}
+if(document.modelContext?.registerTool){const lifecycle=new AbortController();addEventListener('pagehide',()=>lifecycle.abort(),{once:true});try{Promise.resolve(document.modelContext.registerTool({name:'select_kitchen_material',title:'Подобрать материал кухни',description:'Изменить верхние фасады, столешницу с фартуком или нижние фасады в демонстрационном конструкторе. Не отправляет заявку.',inputSchema:{type:'object',properties:{zone:{type:'string',enum:['upper','middle','lower']},finish:{type:'string',enum:['milk','oak','olive']}},required:['zone','finish'],additionalProperties:false},annotations:{readOnlyHint:false,untrustedContentHint:false},execute:async input=>{if(!input||Object.keys(input).some(k=>!['zone','finish'].includes(k)))throw Error('Invalid configuration');return selectFinish(input.zone,finishes.findIndex(f=>f.id===input.finish))}},{signal:lifecycle.signal})).catch(()=>{})}catch{}}
