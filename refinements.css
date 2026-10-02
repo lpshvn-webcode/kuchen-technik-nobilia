@@ -1,4 +1,6 @@
 /* Compact sections and consistent vector controls. */
+.showroom-text-only { max-width: 800px; }
+.showroom-text-only h2 br { display: none; }
 /* A distinct editorial voice only for the opening headline. */
 .hero h1 { font-family: Manrope, Arial, sans-serif; font-weight: 500; font-size: clamp(45px, 5.2vw, 77px); line-height: 1.09; letter-spacing: -2.8px; }
 .hero h1 em { font-weight: 400; }
