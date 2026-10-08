@@ -14,6 +14,7 @@ const ICONS = {
 const icon = (name, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[name]}</svg>`;
 const ARROW = '<svg class="ui-arrow" viewBox="0 0 32 32" aria-hidden="true"><path d="M6 26 26 6M15 6h11v11"/></svg>';
 const CHEVRON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 15 6-6 6 6"/></svg>';
+const RESTART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.600-5.900M4 4v4.500h4.500"/></svg>';
 const SIDE = d => `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="${d < 0 ? 'm14 6-6 6 6 6' : 'm10 6 6 6-6 6'}"/></svg>`;
 const PIN = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.800 6 10 6 10Z"/><circle cx="12" cy="11" r="2"/></svg>';
 const SWIPE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11V5.500a1.500 1.500 0 0 1 3 0V11m0-1.500a1.500 1.500 0 0 1 3 0V12m0-1a1.500 1.500 0 0 1 3 0v4.500A5.500 5.500 0 0 1 12.500 21h-1.200a5.500 5.500 0 0 1-4.600-2.500L4.500 15a1.500 1.500 0 0 1 2.300-1.900L9 15.500"/><path d="M3 4.500 1.500 6 3 7.500M7 4.500 8.500 6 7 7.500"/></svg>';
@@ -24,7 +25,7 @@ function loadStyles() {
   if (stylesPromise) return stylesPromise;
   stylesPromise = new Promise((resolve, reject) => {
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = 'showroom/showroom.css?v=20261008-photo2';
+    link.rel = 'stylesheet'; link.href = 'showroom/showroom.css?v=20261008-design';
     link.onload = resolve;
     link.onerror = () => { stylesPromise = null; reject(new Error('Showroom styles unavailable')); };
     document.head.append(link);
@@ -51,7 +52,7 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
 
   host.hidden = false; host.style.visibility = 'hidden';
   host.innerHTML = `<div class="sr-shell" role="dialog" aria-modal="true" aria-label="Интерактивный шоурум ${cfg.title}">
-  <div class="sr-top"><button class="sr-back" type="button" data-close-showroom aria-label="Закрыть шоурум">← <span>К кухне</span></button><div class="sr-title"><span class="sr-kicker">Интерактивный шоурум</span><strong>${cfg.title}</strong></div><a class="sr-quote" href="#popup1" data-popup="estimate" data-source="mini-showroom" data-interest="${modelId}"><span>Рассчитать<i> стоимость</i></span></a></div>
+  <div class="sr-top"><button class="sr-back" type="button" data-close-showroom aria-label="Закрыть шоурум">← <span>К кухне</span></button><div class="sr-title"><span class="sr-kicker">Интерактивный шоурум</span><strong>${cfg.title}</strong></div><a class="sr-quote" href="#popup1" data-popup="estimate" data-source="mini-showroom" data-interest="${modelId}"><span>Рассчитать<i> стоимость</i></span>${ARROW}</a></div>
   <div class="sr-stage" tabindex="0" aria-label="Осмотр кухни: перетащите, чтобы повернуть камеру, прокрутите для приближения">
    <div class="sr-shade"></div><div class="sr-flash"></div><div class="sr-points" aria-label="Детали кухни"></div>
    <div class="sr-hud">
@@ -60,8 +61,11 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
     <button class="sr-live" type="button" aria-pressed="false" hidden>${PEOPLE}<span>Оживить сцену</span></button>
     <div class="sr-bottom">
      <div class="sr-chip" ${chipOn ? '' : 'hidden'}><i></i>Нажмите на детали</div>
-     <div class="sr-center"><button class="sr-go" type="button" data-go aria-label="Дальше">${CHEVRON}</button><div class="sr-hint" ${hintOn ? '' : 'hidden'}>${SWIPE}<span>Проведите, чтобы осмотреть</span></div></div>
-     <div class="sr-nav" role="group" aria-label="Точки осмотра"><span class="sr-nav-name"></span><span class="sr-nav-dots">${PIN}${cfg.stations.map((s, i) => `<button type="button" data-step="${i}" aria-label="${s.title}"></button>`).join('')}</span></div>
+     <div class="sr-center"><button class="sr-go" type="button" data-go><span class="sr-go-text"><small>Дальше</small><strong></strong></span><span class="sr-go-icon"></span></button><div class="sr-hint" ${hintOn ? '' : 'hidden'}>${SWIPE}<span>Проведите, чтобы осмотреть</span></div></div>
+     <div class="sr-nav">
+      <button class="sr-nav-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="sr-menu">${PIN}<span class="sr-nav-text"><small></small><strong></strong></span>${CHEVRON}</button>
+      <div class="sr-menu" id="sr-menu" role="menu" hidden><p class="sr-menu-title">Выберите ракурс</p>${cfg.stations.map((s, i) => `<button type="button" role="menuitemradio" aria-checked="false" data-step="${i}"><span class="sr-menu-n">${String(i + 1).padStart(2, '0')}</span><span class="sr-menu-t"><strong>${s.title}</strong>${s.caption ? `<em>${s.caption}</em>` : ''}</span></button>`).join('')}</div>
+     </div>
     </div>
    </div>
    <div class="sr-loading"><span></span></div><div class="sr-live-region" aria-live="polite"></div>
@@ -69,8 +73,8 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
   <aside class="sr-detail" hidden role="dialog" aria-label="Деталь кухни"></aside>
  </div>`;
   const shell = host.querySelector('.sr-shell'), stageEl = host.querySelector('.sr-stage'), pointsEl = host.querySelector('.sr-points'), detailEl = host.querySelector('.sr-detail');
-  const liveBtn = host.querySelector('.sr-live'), navName = host.querySelector('.sr-nav-name'), liveRegion = host.querySelector('.sr-live-region');
-  const flashEl = host.querySelector('.sr-flash'), hintEl = host.querySelector('.sr-hint'), chipEl = host.querySelector('.sr-chip'), goBtn = host.querySelector('.sr-go'), dots = [...host.querySelectorAll('[data-step]')];
+  const liveBtn = host.querySelector('.sr-live'), liveRegion = host.querySelector('.sr-live-region'), menuEl = host.querySelector('.sr-menu'), navBtn = host.querySelector('.sr-nav-btn');
+  const flashEl = host.querySelector('.sr-flash'), hintEl = host.querySelector('.sr-hint'), chipEl = host.querySelector('.sr-chip'), goBtn = host.querySelector('.sr-go'), menuItems = [...menuEl.querySelectorAll('[data-step]')];
   stageEl.style.setProperty('--lqip', `url(${cfg.photos[cfg.stations[0].photo].lqip})`);
   document.body.style.overflow = 'hidden';
 
@@ -115,15 +119,22 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
     shell.classList.toggle('sr-detail-open', !!detail);
   }
   function renderNav() {
-    const s = cfg.stations[si];
-    dots.forEach((d, i) => d.setAttribute('aria-current', i === si ? 'step' : 'false'));
-    navName.textContent = `${String(si + 1).padStart(2, '0')} / ${String(cfg.stations.length).padStart(2, '0')} · ${s.title}`;
-    const last = si === cfg.stations.length - 1, next = cfg.stations[last ? 0 : si + 1];
+    const s = cfg.stations[si], total = cfg.stations.length;
+    menuItems.forEach((d, i) => d.setAttribute('aria-checked', String(i === si)));
+    navBtn.querySelector('small').textContent = `Ракурс ${String(si + 1).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
+    navBtn.querySelector('strong').textContent = s.title;
+    const last = si === total - 1, next = cfg.stations[last ? 0 : si + 1];
     goBtn.classList.toggle('sr-go-restart', last);
-    goBtn.setAttribute('aria-label', last ? `Вернуться: ${next.title}` : `Дальше: ${next.title}`);
-    goBtn.dataset.label = last ? 'К началу' : next.title;
+    goBtn.querySelector('small').textContent = last ? 'С начала' : 'Дальше';
+    goBtn.querySelector('strong').textContent = next.title;
+    goBtn.querySelector('.sr-go-icon').innerHTML = last ? RESTART : ARROW;
+    goBtn.setAttribute('aria-label', last ? `Вернуться к началу: ${next.title}` : `Следующий ракурс: ${next.title}`);
     liveBtn.hidden = !cur?.ph.live;
     liveRegion.textContent = s.title;
+  }
+  function toggleMenu(open = menuEl.hidden) {
+    menuEl.hidden = !open; navBtn.setAttribute('aria-expanded', String(open)); shell.classList.toggle('sr-menu-open', open);
+    if (open) { hideHint(); menuEl.querySelector('[aria-checked=true]')?.focus({preventScroll: true}); }
   }
   function buildSpots() {
     pointsEl.replaceChildren();
@@ -255,8 +266,12 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
      <a class="sr-cta" href="#popup1" data-popup="estimate" data-source="mini-showroom" data-interest="${modelId}:${spot.card}"><span>Узнать стоимость</span>${ARROW}</a>
      <button class="sr-return" type="button">Вернуться к обзору кухни</button></div>`;
     detailEl.hidden = false; detailEl.scrollTop = 0;
-    requestAnimationFrame(() => { shell.classList.add('sr-detail-open'); detailEl.classList.add('sr-open'); });
-    detailEl.querySelector('.sr-detail-x').focus({preventScroll: true});
+    shell.classList.add('sr-detail-open');
+    const reveal = () => {
+      if (detail !== spot || closed) return;
+      detailEl.classList.add('sr-open');
+      detailEl.querySelector('.sr-detail-x').focus({preventScroll: true});
+    };
     // bring the detail into the free part of the screen: the panel opens on the side away from the spot
     const mob = mobile(), pw = Math.min(470, stage.cw * .42) / stage.cw, left = !mob && spot.x >= 50;
     detailEl.classList.toggle('sr-left', left);
@@ -270,7 +285,10 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
     let z = base, tgt = at(z);
     while (tgt.err > .02 && z < zmax(cur)) { z = Math.min(zmax(cur), z + .1); tgt = at(z); }
     tgt = tgt.got;
-    vel.x = vel.y = 0; flyTo(tgt, 1000, easeIO);
+    vel.x = vel.y = 0;
+    // phone: the camera zooms in on the detail first, then the sheet rises; desktop: both at once
+    if (mob && !reduced()) flyTo(tgt, 1150, easeIO, () => setTimeout(reveal, 120));
+    else { flyTo(tgt, 1000, easeIO); requestAnimationFrame(reveal); }
     setShellState();
   }
   function closeDetail(instant = false) {
@@ -319,6 +337,7 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
   }
   const interactive = e => e.target.closest('button,a');
   stageEl.addEventListener('pointerdown', e => {
+    if (!menuEl.hidden && !e.target.closest('.sr-nav')) toggleMenu(false);
     if (interactive(e) || busy || !cur || xfade) return;
     anim = null; vel.x = vel.y = 0; lastInput = performance.now(); moved = false;
     stageEl.setPointerCapture(e.pointerId); pointers.set(e.pointerId, {x: e.clientX, y: e.clientY});
@@ -372,14 +391,16 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
     if (spotEl) { const spot = cfg.hotspots.find(h => h.id === spotEl.dataset.spot); if (spot) openDetail(spot); return; }
     const lookBtn = e.target.closest('[data-look]'); if (lookBtn) return look(Number(lookBtn.dataset.look));
     if (e.target.closest('[data-go]')) return goNext();
-    const step = e.target.closest('[data-step]'); if (step) return goTo(Number(step.dataset.step), 'dots');
+    if (e.target.closest('.sr-nav-btn')) return toggleMenu();
+    const step = e.target.closest('[data-step]'); if (step) { toggleMenu(false); return goTo(Number(step.dataset.step), 'menu'); }
+    if (!menuEl.hidden && !e.target.closest('.sr-menu')) toggleMenu(false);
     if (e.target.closest('.sr-live')) return toggleLive();
     if (e.target.closest('.sr-detail-x,.sr-return')) return closeDetail();
     if (e.target.closest('.sr-cta')) ev('showroom_cta_click', {hotspot_id: detail?.card, category: detail && cfg.cards[detail.card].category});
     if (e.target.closest('.sr-quote')) ev('showroom_cta_click', {hotspot_id: 'header'});
   }, {signal});
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { if (detail) closeDetail(); else if (!closed) close(); return; }
+    if (e.key === 'Escape') { if (!menuEl.hidden) { toggleMenu(false); navBtn.focus({preventScroll: true}); } else if (detail) closeDetail(); else if (!closed) close(); return; }
     if (e.key === 'Tab') {
       const nodes = [...shell.querySelectorAll('button:not([hidden]),a[href],[tabindex="0"]')].filter(n => n.offsetParent !== null && !n.closest('[hidden]'));
       if (!nodes.length) return;
