@@ -9,21 +9,28 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-close]');i
 $('.menu-toggle').onclick=()=>{showDialog($('#mobile-menu'));$('.menu-toggle').setAttribute('aria-expanded','true')};
 $$('#mobile-menu a').forEach(a=>a.onclick=()=>$('#mobile-menu').close());
 const models=[
-{id:'structura',name:'STRUCTURA 419',image:'structura.jpeg'},
-{id:'senso',name:'SENSO 488',tag:'СВЕТ И ПРОСТОТА',finish:'Матовый белый',description:'Светлые матовые фасады и выразительные древесные детали. Спокойная кухня, открытая для жизни.',code:'488 · Premium honed white',path:'natural-scandi/senso-488'},
-{id:'natura',name:'NATURA 744',tag:'ТЕПЛО ПРИРОДЫ',finish:'Фактура дуба Montreal',description:'Тёплый характер древесной фактуры и чистая геометрия. Фасад с декором дуба Montreal — не массив дерева.',code:'744 · Oak Montreal reproduction',path:'natural-scandi/natura-744'},
-{id:'riva',name:'RIVA 842',tag:'МЯГКАЯ ГЕОМЕТРИЯ',finish:'Песочная фактура бетона',description:'Сдержанный песочный оттенок с декором бетона. Архитектурное решение для современного пространства.',code:'842 · Concrete sand reproduction',path:'modern-kitchens/riva-842'},
-{id:'slate',name:'SENSO 491',tag:'ВЫРАЗИТЕЛЬНЫЙ КОНТРАСТ',finish:'Матовый сланцевый серый',description:'Глубокий серый оттенок и ясные линии. Выразительная основа для кухни с собственным характером.',code:'491 · Premium honed slate grey',path:'designer-kitchens/senso-491'},
-{id:'easy',name:'EASYTOUCH 969',tag:'ЕСТЕСТВЕННОЕ РАВНОВЕСИЕ',finish:'Ультраматовый песочный',description:'Мягкий песочный цвет объединяет кухню с жилым пространством. Тёплая нейтральная палитра для цельного интерьера.',code:'969 · Sand ultra matt',path:'designer-kitchens/easytouch-969'}
+{id:'structura',name:'STRUCTURA 419',image:'structura.jpeg',title:'Тёмный дуб и камень',description:'Выразительная древесная фактура, каменная рабочая поверхность и архитектурная композиция.',gallery:['showroom/structura-419-0.jpg','showroom/structura-419-1.jpg','showroom/structura-419-2.jpg','showroom/structura-419-3.jpg','showroom/structura-419-4.jpg','showroom/structura-419-5.jpg']},
+{id:'senso498',name:'SENSO 498',image:'senso-498.jpg',title:'Тёплый шоколадный матовый',description:'Мягкий оттенок фасадов, светлый камень и латунные детали в цельном жилом пространстве.',gallery:['senso-498.jpg','showroom/senso-498-1.jpg','showroom/senso-498-2.jpg','showroom/senso-498-3.jpg','showroom/senso-498-4.jpg']},
+{id:'senso',name:'SENSO 488',title:'Свет и простота',description:'Светлые матовые фасады и выразительные древесные детали.',gallery:['senso.webp','senso-1.webp','senso-2.webp','senso-3.webp']},
+{id:'natura',name:'NATURA 744',title:'Тепло природы',description:'Тёплый характер древесной фактуры и чистая геометрия.',gallery:['natura.webp','natura-1.webp','natura-2.webp','natura-3.webp']},
+{id:'riva',name:'RIVA 842',title:'Мягкая геометрия',description:'Сдержанный песочный оттенок и архитектурное решение.',gallery:['riva.webp','riva-1.webp','riva-2.webp','riva-3.webp']},
+{id:'slate',name:'SENSO 491',title:'Выразительный контраст',description:'Глубокий серый оттенок и ясные линии.',gallery:['slate.webp','slate-1.webp','slate-2.webp','slate-3.webp']},
+{id:'easy',name:'EASYTOUCH 969',title:'Естественное равновесие',description:'Мягкий песочный цвет объединяет кухню с жилым пространством.',gallery:['easy.webp','easy-1.webp','easy-2.webp','easy-3.webp']}
 ];
 window.collections=models;
-const track=$('#collection-track');
-track.innerHTML=models.map(m=>`<article class="collection-card"><div class="photo"><img src="${m.image || m.id+'.webp'}" alt="Кухня Nobilia ${m.name}" width="1000" height="730" loading="lazy"></div><div class="card-info"><h3>${m.name}</h3></div></article>`).join('');
-let activeIndex=0;
-function updateCarousel(){const cards=$$('.collection-card');const left=track.getBoundingClientRect().left+parseFloat(getComputedStyle(track).paddingLeft);activeIndex=cards.reduce((best,c,i)=>Math.abs(c.getBoundingClientRect().left-left)<Math.abs(cards[best].getBoundingClientRect().left-left)?i:best,0);$('#collection-counter').textContent=`${String(activeIndex+1).padStart(2,'0')} / ${String(models.length).padStart(2,'0')}`;$('#prev').disabled=track.scrollLeft<5;$('#next').disabled=track.scrollLeft+track.clientWidth>=track.scrollWidth-5}
-track.addEventListener('scroll',updateCarousel,{passive:true});addEventListener('resize',updateCarousel);updateCarousel();
-function moveCarousel(dir){track.scrollBy({left:dir*($('.collection-card').getBoundingClientRect().width+parseFloat(getComputedStyle(track).gap)),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'})}
-$('#prev').onclick=()=>moveCarousel(-1);$('#next').onclick=()=>moveCarousel(1);
+const modelImage=m=>m.image||m.id+'.webp';
+function catalogCard(m,duplicate=false){return `<button class="catalog-card" type="button" data-showroom-model="${m.id}"${duplicate?' tabindex="-1" aria-hidden="true"':''}><span class="catalog-photo"><img src="${modelImage(m)}" alt="" width="1000" height="730" loading="lazy"></span><strong>${m.name}</strong></button>`}
+function renderMarquee(target,list){const cards=list.map(m=>catalogCard(m)).join('');const copies=list.map(m=>catalogCard(m,true)).join('');target.innerHTML=`<div class="catalog-set">${cards}</div><div class="catalog-set" aria-hidden="true">${copies}</div>`}
+renderMarquee($('#catalog-row-one'),models.slice(0,4));
+renderMarquee($('#catalog-row-two'),models.slice(4).concat(models.slice(0,1)));
+
+let showroomModel=models[0],showroomIndex=0;
+const showroomImage=$('#showroom-image'),showroomSelector=$('#showroom-selector'),showroomThumbs=$('#showroom-thumbs');
+showroomSelector.innerHTML=models.map((m,i)=>`<button type="button" data-showroom-select="${m.id}" aria-pressed="${i===0}">${m.name}</button>`).join('');
+function updateShowroom(){const gallery=showroomModel.gallery;showroomImage.src=gallery[showroomIndex];showroomImage.alt=`${showroomModel.name} — кадр ${showroomIndex+1}`;$('#showroom-current').textContent=String(showroomIndex+1).padStart(2,'0');$('#showroom-total').textContent=String(gallery.length).padStart(2,'0');$('#showroom-code').textContent=showroomModel.name;$('#showroom-title').textContent=showroomModel.title;$('#showroom-copy').textContent=showroomModel.description;showroomSelector.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.showroomSelect===showroomModel.id)));showroomThumbs.innerHTML=gallery.map((src,i)=>`<button type="button" data-showroom-frame="${i}" aria-pressed="${i===showroomIndex}" aria-label="Кадр ${i+1}"><img src="${src}" alt="" loading="lazy"></button>`).join('')}
+function selectShowroom(id,scroll=false){const model=models.find(m=>m.id===id);if(!model)return;showroomModel=model;showroomIndex=0;updateShowroom();if(scroll)$('#mini-showroom').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'})}
+document.addEventListener('click',e=>{const card=e.target.closest('[data-showroom-model]');if(card&&!card.hasAttribute('aria-hidden'))selectShowroom(card.dataset.showroomModel,true);const select=e.target.closest('[data-showroom-select]');if(select)selectShowroom(select.dataset.showroomSelect);const frame=e.target.closest('[data-showroom-frame]');if(frame){showroomIndex=Number(frame.dataset.showroomFrame);updateShowroom()}const nav=e.target.closest('[data-showroom-direction]');if(nav){showroomIndex=(showroomIndex+Number(nav.dataset.showroomDirection)+showroomModel.gallery.length)%showroomModel.gallery.length;updateShowroom()}});
+updateShowroom();
 const state={model:null,configuration:null,source:'contact',type:'estimate',interest:null};
 // All assets share one camera; each image is clipped to its own material zone.
 const finishes=[
