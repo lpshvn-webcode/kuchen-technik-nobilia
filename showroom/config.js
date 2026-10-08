@@ -4,7 +4,7 @@ const link=(id,direction,x=50,y=78,mx=x,my=y)=>({viewpointId:id,direction,positi
 const feature=(id,viewpointId,title,category,description,image,position,specs=[])=>({id,viewpointId,title,category,description,image,position,specs});
 function makePrepared(id,title,scenes,features){return {id,title,viewpoints:scenes.map((s,i)=>({id:`view-${i+1}`,title:s.title,image:interactiveImage(id,i+1),connections:s.connections})),hotspots:features}}
 const configs={
- lightminimal:makePrepared('lightminimal','Светлый минимализм',[
+ lightminimal:makePrepared('lightminimal','Cadra 746',[
   {title:'Общий вид',connections:[link('view-2','forward',55,78,51,74)]},
   {title:'Перед островом',connections:[link('view-1','back',19,82,18,82),link('view-3','right',73,74,65,75)]},
   {title:'Остров и рабочая зона',connections:[link('view-2','back',26,81,23,84),link('view-4','forward',62,68,58,74)]},
@@ -14,7 +14,7 @@ const configs={
   feature('stone-worktop','view-2','Светлая столешница','Материалы','Спокойная светлая поверхность объединяет рабочие зоны.','showroom/light-minimal-worktop.jpg',point(50,65,52,61)),
   feature('lit-niche','view-3','Подсвеченная ниша','Технологии','Мягкая подсветка выделяет фактуру камня и предметы в нише.','showroom/light-minimal-niche.jpg',point(55,35,50,30))
  ]),
- lightframe:makePrepared('lightframe','Светлая рамка',[
+ lightframe:makePrepared('lightframe','Nordic 793',[
   {title:'Общий вид',connections:[link('view-2','left',35,76,42,75)]},
   {title:'Вдоль острова',connections:[link('view-1','back',82,78,81,80),link('view-3','forward',60,70,52,75)]},
   {title:'Рабочая зона',connections:[link('view-2','back',22,80,25,82)]}

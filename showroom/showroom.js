@@ -1,4 +1,4 @@
-import {getShowroomConfig} from './config.js';
+import {getShowroomConfig} from './config.js?v=20261008-modelnames';
 import {ImageViewAdapter} from './image-view-adapter.js';
 
 const mobile=()=>matchMedia('(max-width:700px)').matches;
