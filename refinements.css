@@ -232,6 +232,25 @@
 .showroom-thumbs button[aria-pressed=true] { border-color:#202521; opacity:1; }
 .showroom-thumbs img { width:100%; height:100%; object-fit:cover; }
 .showroom-panel .button { width:100%; }
+.showroom-hint { position:absolute; z-index:3; left:20px; bottom:18px; display:flex; align-items:center; gap:9px; padding:8px 12px; border-radius:100px; background:#202521bd; color:white; font-size:11px; backdrop-filter:blur(7px); }
+.showroom-hint span { width:8px; height:8px; border-radius:50%; background:white; box-shadow:0 0 0 5px #ffffff2b; }
+.showroom-hotspots { position:absolute; inset:0; z-index:4; pointer-events:none; }
+.hotspot { position:absolute; left:var(--x); top:var(--y); transform:translate(-50%,-50%); width:34px; height:34px; display:grid; place-items:center; padding:0; border:1px solid #fff; border-radius:50%; background:#202521d9; color:white; pointer-events:auto; box-shadow:0 0 0 0 #fff7; animation:hotspot-pulse 2.4s ease-out infinite; }
+.hotspot::before { content:''; position:absolute; inset:-7px; border:1px solid #ffffff6b; border-radius:50%; }
+.hotspot span { font-size:10px; font-style:normal; }
+.hotspot em { position:absolute; left:44px; top:50%; transform:translateY(-50%); padding:6px 9px; border-radius:3px; background:#202521d9; color:white; font-size:10px; font-style:normal; white-space:nowrap; opacity:0; transition:opacity .2s; pointer-events:none; }
+.hotspot:hover em, .hotspot:focus-visible em { opacity:1; }
+@keyframes hotspot-pulse { 0%,45% { box-shadow:0 0 0 0 #fff7; } 75%,100% { box-shadow:0 0 0 15px #fff0; } }
+.showroom-legend { display:grid; gap:0; border-top:1px solid var(--line); }
+.showroom-legend button { display:flex; align-items:center; gap:13px; min-height:46px; padding:8px 0; border:0; border-bottom:1px solid var(--line); background:transparent; text-align:left; font-size:13px; }
+.showroom-legend button span { color:var(--warm); font-size:10px; }
+.detail-dialog { width:min(960px,calc(100% - 32px)); padding:0; overflow:hidden; background:#f5f2ec; }
+.detail-dialog > img { width:100%; height:min(58vh,520px); object-fit:cover; }
+.detail-dialog .dialog-close { background:#202521c7; color:white; }
+.detail-copy { padding:30px 36px 34px; }
+.detail-copy .eyebrow { margin-bottom:12px; }
+.detail-copy h2 { margin-bottom:12px; }
+.detail-copy p:not(.eyebrow) { max-width:660px; margin-bottom:18px; }
 
 @media(max-width:700px) {
  .collections { padding-bottom:50px; }
@@ -257,9 +276,17 @@
  .showroom-thumbs { display:flex; overflow-x:auto; gap:7px; scrollbar-width:none; }
  .showroom-thumbs button { flex:0 0 84px; }
  .showroom-panel .button { min-width:0; gap:14px; }
+ .showroom-hint { bottom:12px; left:12px; }
+ .hotspot { width:31px; height:31px; }
+ .hotspot em { display:none; }
+ .detail-dialog { width:calc(100% - 20px); }
+ .detail-dialog > img { height:48vh; min-height:280px; }
+ .detail-copy { padding:25px 20px 28px; }
+ .detail-copy h2 { font-size:27px; }
 }
 @media(prefers-reduced-motion:reduce) {
  .catalog-flow { animation:none!important; transform:none!important; }
  .catalog-marquee { overflow-x:auto; scrollbar-width:none; }
  .catalog-set[aria-hidden=true] { display:none; }
+ .hotspot { animation:none; }
 }
