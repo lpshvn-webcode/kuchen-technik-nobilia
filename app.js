@@ -12,19 +12,14 @@ const models=[
  {id:'lightminimal',name:'СВЕТЛЫЙ МИНИМАЛИЗМ',image:'light-minimal.jpg',title:'Светлый камень и золотые акценты',preview:true},
  {id:'lightframe',name:'СВЕТЛАЯ РАМКА',image:'light-frame.jpg',title:'Светлая рамка и тёплый металл',preview:true},
  {id:'senso498',name:'SENSO 498',image:'senso-498.jpg',title:'Тёплый шоколадный матовый',preview:true},
- {id:'structura',name:'STRUCTURA 419',image:'structura.jpeg',title:'Тёмный дуб и камень',preview:true},
- {id:'senso',name:'SENSO 488',image:'senso.webp',title:'Свет и простота'},
- {id:'natura',name:'NATURA 744',image:'natura.webp',title:'Тепло природы'},
- {id:'riva',name:'RIVA 842',image:'riva.webp',title:'Мягкая геометрия'},
- {id:'slate',name:'SENSO 491',image:'slate.webp',title:'Выразительный контраст'},
- {id:'easy',name:'EASYTOUCH 969',image:'easy.webp',title:'Естественное равновесие'}
+ {id:'structura',name:'STRUCTURA 419',image:'structura.jpeg',title:'Тёмный дуб и камень',preview:true}
 ];
 window.collections=models;
 const modelImage=m=>m.image||m.id+'.webp';
 function catalogCard(m,duplicate=false){return `<button class="catalog-card" type="button" data-showroom-model="${m.id}"${duplicate?' tabindex="-1" aria-hidden="true"':''}><span class="catalog-photo"><img src="${modelImage(m)}" alt="" width="1000" height="730" loading="lazy"></span><strong>${m.name}</strong></button>`}
 function renderMarquee(target,list){const cards=list.map(m=>catalogCard(m)).join('');const copies=list.map(m=>catalogCard(m,true)).join('');target.innerHTML=`<div class="catalog-set">${cards}</div><div class="catalog-set" aria-hidden="true">${copies}</div>`}
 renderMarquee($('#catalog-row-one'),models.slice(0,4));
-renderMarquee($('#catalog-row-two'),models.slice(4).concat(models.slice(0,1)));
+renderMarquee($('#catalog-row-two'),[...models].reverse());
 
 let showroomModel=models[0];
 const showroomSelector=$('#showroom-selector');

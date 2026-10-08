@@ -300,3 +300,28 @@
  .catalog-set[aria-hidden=true] { display:none; }
  .hotspot { animation:none; }
 }
+
+/* Showroom cover: one immersive image with the action inside it. */
+.showroom-preview{display:block;background:transparent;color:#fff}
+.showroom-preview-visual{aspect-ratio:16/9;border-radius:2px;box-shadow:0 26px 65px #2025211a}
+.showroom-preview-visual:after{z-index:1;inset:0;background:linear-gradient(90deg,#121713bd 0%,#12171352 38%,transparent 66%),linear-gradient(0deg,#1217137d 0%,transparent 48%)}
+.showroom-preview-info{position:absolute;z-index:2;inset:0;padding:34px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;pointer-events:none;text-shadow:0 2px 18px #0008}
+.showroom-preview-info>div:first-child{max-width:520px}
+.showroom-preview-info .eyebrow{color:#eee5d5;margin:0 0 12px}
+.showroom-preview-info h3{max-width:520px;margin:0 0 12px;color:#fff;font-size:clamp(28px,3vw,46px);line-height:1.04;letter-spacing:-.045em}
+.showroom-preview-info p:not(.eyebrow){max-width:440px;margin:0;color:#fff;font-size:14px;line-height:1.5}
+.showroom-preview-info .button{pointer-events:auto;margin:0;min-width:min(360px,100%)}
+.showroom-glass-button{background:#f5f2ec20!important;color:#fff!important;border:1px solid #ffffff8f!important;border-radius:100px!important;box-shadow:0 12px 40px #0003,inset 0 1px #ffffff4d!important;backdrop-filter:blur(16px) saturate(1.25);-webkit-backdrop-filter:blur(16px) saturate(1.25)}
+.showroom-glass-button:hover{background:#f5f2ec35!important}
+.showroom-error{pointer-events:auto;padding:12px;background:#202521dc;color:#fff;text-shadow:none}
+
+@media(max-width:700px){
+ .showroom-preview{width:100%}
+ .showroom-preview-visual{aspect-ratio:4/5;min-height:min(74svh,690px);border-radius:0}
+ .showroom-preview-visual:after{background:linear-gradient(0deg,#121713c7 0%,#12171338 42%,transparent 72%)}
+ .showroom-preview-info{padding:24px 20px 22px;justify-content:flex-end;gap:22px}
+ .showroom-preview-info>div:first-child{width:100%}
+ .showroom-preview-info h3{font-size:30px;margin-bottom:8px}
+ .showroom-preview-info p:not(.eyebrow){font-size:13px}
+ .showroom-preview-info .button{width:100%;min-width:0}
+}
