@@ -312,7 +312,7 @@
 .showroom-preview-info h3{max-width:520px;margin:0 0 12px;color:#fff;font-size:clamp(28px,3vw,46px);line-height:1.04;letter-spacing:-.045em}
 .showroom-preview-info p:not(.eyebrow){max-width:440px;margin:0;color:#fff;font-size:14px;line-height:1.5}
 .showroom-preview-info .button{pointer-events:auto;margin:0;min-width:min(360px,100%)}
-.showroom-glass-button{background:#f5f2ec20!important;color:#fff!important;border:1px solid #ffffff8f!important;border-radius:100px!important;box-shadow:0 12px 40px #0003,inset 0 1px #ffffff4d!important;backdrop-filter:blur(16px) saturate(1.25);-webkit-backdrop-filter:blur(16px) saturate(1.25)}
+.showroom-glass-button{background:#f5f2ec20!important;color:#fff!important;border:1px solid #ffffff8f!important;border-radius:4px!important;box-shadow:0 12px 40px #0003,inset 0 1px #ffffff4d!important;backdrop-filter:blur(16px) saturate(1.25);-webkit-backdrop-filter:blur(16px) saturate(1.25)}
 .showroom-glass-button:hover{background:#f5f2ec35!important}
 .showroom-error{pointer-events:auto;padding:12px;background:#202521dc;color:#fff;text-shadow:none}
 
