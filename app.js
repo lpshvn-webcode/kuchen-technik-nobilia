@@ -9,6 +9,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('[data-close]');i
 $('.menu-toggle').onclick=()=>{showDialog($('#mobile-menu'));$('.menu-toggle').setAttribute('aria-expanded','true')};
 $$('#mobile-menu a').forEach(a=>a.onclick=()=>$('#mobile-menu').close());
 const models=[
+{id:'structura',name:'STRUCTURA 419',image:'structura.jpeg'},
 {id:'senso',name:'SENSO 488',tag:'СВЕТ И ПРОСТОТА',finish:'Матовый белый',description:'Светлые матовые фасады и выразительные древесные детали. Спокойная кухня, открытая для жизни.',code:'488 · Premium honed white',path:'natural-scandi/senso-488'},
 {id:'natura',name:'NATURA 744',tag:'ТЕПЛО ПРИРОДЫ',finish:'Фактура дуба Montreal',description:'Тёплый характер древесной фактуры и чистая геометрия. Фасад с декором дуба Montreal — не массив дерева.',code:'744 · Oak Montreal reproduction',path:'natural-scandi/natura-744'},
 {id:'riva',name:'RIVA 842',tag:'МЯГКАЯ ГЕОМЕТРИЯ',finish:'Песочная фактура бетона',description:'Сдержанный песочный оттенок с декором бетона. Архитектурное решение для современного пространства.',code:'842 · Concrete sand reproduction',path:'modern-kitchens/riva-842'},
@@ -17,9 +18,9 @@ const models=[
 ];
 window.collections=models;
 const track=$('#collection-track');
-track.innerHTML=models.map(m=>`<article class="collection-card"><div class="photo"><img src="${m.id}.webp" alt="Кухня Nobilia ${m.name}" width="1000" height="730" loading="lazy"></div><div class="card-info"><h3>${m.name}</h3></div></article>`).join('');
+track.innerHTML=models.map(m=>`<article class="collection-card"><div class="photo"><img src="${m.image || m.id+'.webp'}" alt="Кухня Nobilia ${m.name}" width="1000" height="730" loading="lazy"></div><div class="card-info"><h3>${m.name}</h3></div></article>`).join('');
 let activeIndex=0;
-function updateCarousel(){const cards=$$('.collection-card');const left=track.getBoundingClientRect().left+parseFloat(getComputedStyle(track).paddingLeft);activeIndex=cards.reduce((best,c,i)=>Math.abs(c.getBoundingClientRect().left-left)<Math.abs(cards[best].getBoundingClientRect().left-left)?i:best,0);$('#collection-counter').textContent=`${String(activeIndex+1).padStart(2,'0')} / 05`;$('#prev').disabled=track.scrollLeft<5;$('#next').disabled=track.scrollLeft+track.clientWidth>=track.scrollWidth-5}
+function updateCarousel(){const cards=$$('.collection-card');const left=track.getBoundingClientRect().left+parseFloat(getComputedStyle(track).paddingLeft);activeIndex=cards.reduce((best,c,i)=>Math.abs(c.getBoundingClientRect().left-left)<Math.abs(cards[best].getBoundingClientRect().left-left)?i:best,0);$('#collection-counter').textContent=`${String(activeIndex+1).padStart(2,'0')} / ${String(models.length).padStart(2,'0')}`;$('#prev').disabled=track.scrollLeft<5;$('#next').disabled=track.scrollLeft+track.clientWidth>=track.scrollWidth-5}
 track.addEventListener('scroll',updateCarousel,{passive:true});addEventListener('resize',updateCarousel);updateCarousel();
 function moveCarousel(dir){track.scrollBy({left:dir*($('.collection-card').getBoundingClientRect().width+parseFloat(getComputedStyle(track).gap)),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'})}
 $('#prev').onclick=()=>moveCarousel(-1);$('#next').onclick=()=>moveCarousel(1);
