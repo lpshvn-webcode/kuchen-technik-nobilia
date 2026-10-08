@@ -10,7 +10,7 @@ Required owner inputs:
 - Approved minimum-price claim, if desired; currently omitted.
 - Any real images for other rooms; currently text only.
 
-Image sources and unconfirmed usage rights: dist/sources.json. Images are official Nobilia collection illustrations, not salon projects or showroom images.
+Image sources: sources.json. Usage rights confirmed under the Küchen Technik × Nobilia agreement. Images are official Nobilia collection illustrations, not salon projects or showroom images.
 
 Implemented: responsive landing, five verified collections with modal galleries, three visual moods, context transfer, compact process and warranty sections, prominent benefits, SVG arrows, keyboard dialogs, menu, tabs, FAQ, reduced motion, local Manrope fonts and license.
 

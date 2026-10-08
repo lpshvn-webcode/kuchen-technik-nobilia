@@ -8,7 +8,7 @@
       "/fileadmin/_processed_/d/7/csm_488_senso_g1_e7538c5a88.webp",
       "/fileadmin/_processed_/5/f/csm_488_senso_g2_d483a1f505.webp"
     ],
-    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia."
   },
   {
     "id": "natura",
@@ -19,7 +19,7 @@
       "/fileadmin/_processed_/b/8/csm_744_natura_g1_d244318b34.webp",
       "/fileadmin/_processed_/0/d/csm_744_natura_g2_597ce899c8.webp"
     ],
-    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia."
   },
   {
     "id": "riva",
@@ -30,7 +30,7 @@
       "/fileadmin/_processed_/2/c/csm_842_riva_g1_df9ef1d208.webp",
       "/fileadmin/_processed_/b/f/csm_842_riva_g2_e0e484cbc2.webp"
     ],
-    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia."
   },
   {
     "id": "slate",
@@ -41,7 +41,7 @@
       "/fileadmin/_processed_/8/b/csm_491_senso_g1_d46b1a381e.webp",
       "/fileadmin/_processed_/8/b/csm_491_senso_g1_b808b221b5.webp"
     ],
-    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia."
   },
   {
     "id": "easy",
@@ -52,6 +52,14 @@
       "/fileadmin/_processed_/a/4/csm_969_easytouch_g1_b3fcc05463.webp",
       "/fileadmin/_processed_/e/e/csm_969_easytouch_g2_4775b3892f.webp"
     ],
-    "rights": "Official Nobilia imagery. Dealer permission must be confirmed before public launch."
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia."
+  },
+  {
+    "id": "structura-425",
+    "source": "Official Nobilia photographs supplied by the client (showroom/source/structura-425/, 15 images, 5K)",
+    "images": [
+      "30606…30625_26_Structura_425_*.jpeg"
+    ],
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia."
   }
 ]
