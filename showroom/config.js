@@ -1,5 +1,4 @@
-const interactiveImage=(id,n)=>{const stem=`showroom/interactive/${id}-view-${String(n).padStart(2,'0')}`;return {desktop:`${stem}-desktop.webp`,mobile:`${stem}-mobile.webp`,fallbackDesktop:`${stem}-desktop.jpg`,fallbackMobile:`${stem}-mobile.jpg`}};
-const oldImage=name=>({desktop:name,mobile:name,fallbackDesktop:name,fallbackMobile:name});
+const interactiveImage=(id,n)=>{const stem=`showroom/interactive/${id}-view-${String(n).padStart(2,'0')}`;return {desktop:`${stem}-desktop.webp`,mobile:`${stem}-desktop.webp`,fallbackDesktop:`${stem}-desktop.jpg`,fallbackMobile:`${stem}-desktop.jpg`}};
 const point=(x,y,mx=x,my=y)=>({desktop:{x,y},mobile:{x:mx,y:my}});
 const link=(id,direction,x=50,y=78,mx=x,my=y)=>({viewpointId:id,direction,position:point(x,y,mx,my)});
 const feature=(id,viewpointId,title,category,description,image,position,specs=[])=>({id,viewpointId,title,category,description,image,position,specs});
@@ -43,8 +42,4 @@ const configs={
   feature('dark-stone','view-3','Каменная столешница','Материалы','Светлый камень создаёт баланс с тёмным дубом.','showroom/structura-419-4.jpg',point(55,55,53,51))
  ])
 };
-for(const [id,title] of [['senso','Senso 488'],['natura','Natura 744'],['riva','Riva 842'],['slate','Senso 491'],['easy','Easytouch 969']]){
- const images=[`${id}.webp`,`${id}-1.webp`,`${id}-2.webp`];
- configs[id]={id,title,viewpoints:images.map((image,i)=>({id:`view-${i+1}`,title:['Общий вид','Другой ракурс','Детали'][i],image:oldImage(image),connections:[...(i>0?[link(`view-${i}`,'back',22,81)]:[]),...(i<2?[link(`view-${i+2}`,'forward',56,77)]:[])]})),hotspots:[feature(`${id}-detail`,'view-2','Детали кухни','Материалы','Рассмотрите выбранную кухню с другого ракурса.',`${id}-3.webp`,point(55,48,55,47))]};
-}
 export function getShowroomConfig(id){return configs[id]||configs.lightminimal}

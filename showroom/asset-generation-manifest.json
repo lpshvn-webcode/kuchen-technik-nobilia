@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "status": "frame_sequences_required",
+  "viewerMode": "wide_image_pan_fallback",
+  "note": "Текущая версия честно использует широкие фотографии и подготовленные viewpoints. Плавное frame-scrubbing включается после добавления согласованных AI-кадров; настоящая 360°-панорама не имитируется.",
+  "capture": {
+    "yawAnglesDegrees": [-15, -12.5, -10, -7.5, -5, -2.5, 0, 2.5, 5, 7.5, 10, 12.5, 15],
+    "centerFrame": 6,
+    "formats": ["avif", "webp"],
+    "mobileWidth": 1100,
+    "desktopWidth": 2000,
+    "filenamePattern": "{kitchen}/{viewpoint}/yaw-{index:02}.{format}",
+    "loading": "center first, then ±1, ±2; remaining frames on idle"
+  },
+  "generationPrompt": {
+    "base": "Preserve the kitchen exactly: identical layout, cabinet count, fronts, colors, countertop, hardware, appliances, lighting, architecture and proportions. Photorealistic interior photography. Do not add, remove or redesign objects.",
+    "perFrame": "Rotate only the virtual camera to yaw {angle} degrees around the fixed viewpoint. Keep camera height, lens, exposure and all geometry unchanged. Maintain strict cross-frame consistency."
+  },
+  "kitchens": [
+    {"id": "lightminimal", "viewpoints": 4},
+    {"id": "lightframe", "viewpoints": 3},
+    {"id": "senso498", "viewpoints": 3},
+    {"id": "structura", "viewpoints": 3}
+  ]
+}
