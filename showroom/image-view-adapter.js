@@ -1,0 +1,12 @@
+export class ImageViewAdapter{
+ constructor(stage){this.stage=stage;this.layer=stage.querySelector('.sr-images');this.current=null;this.offset=0;this.destroyed=false;this.timers=new Set();this.cache=new Map();this.reduced=matchMedia('(prefers-reduced-motion: reduce)').matches}
+ imagePath(view){const mobile=matchMedia('(max-width:700px)').matches;return view.image[mobile?'mobile':'desktop']||view.image.desktop}
+ fallbackPath(view){const mobile=matchMedia('(max-width:700px)').matches;return view.image[mobile?'fallbackMobile':'fallbackDesktop']||view.image.fallbackDesktop||view.image.desktop}
+ load(view){const path=this.imagePath(view);if(this.cache.has(path))return this.cache.get(path);const fallback=this.fallbackPath(view);const promise=new Promise((resolve,reject)=>{const img=new Image();img.alt='';img.decoding='async';img.onload=()=>resolve(img);img.onerror=()=>{if(img.src.endsWith(fallback)||path===fallback)reject(new Error('Image failed to load'));else img.src=fallback};img.src=path}).catch(error=>{this.cache.delete(path);throw error});this.cache.set(path,promise);return promise}
+ delay(ms){return new Promise(resolve=>{const record={id:null,resolve};record.id=setTimeout(()=>{this.timers.delete(record);resolve()},ms);this.timers.add(record)})}
+ async showInitial(view){const loaded=await this.load(view);if(this.destroyed)return;const img=loaded.cloneNode();img.className='sr-image sr-image-current';this.layer.replaceChildren(img);this.current=img;this.offset=0}
+ async transition(view,direction){const loaded=await this.load(view);if(this.destroyed)return;const incoming=loaded.cloneNode();incoming.className='sr-image sr-image-enter';this.layer.append(incoming);const old=this.current;this.offset=0;const shift=direction==='left'?-18:direction==='right'?18:0;this.layer.style.setProperty('--sr-shift',`${shift}px`);requestAnimationFrame(()=>{if(this.destroyed)return;old?.classList.add('sr-image-exit');incoming.classList.add('sr-image-enter-active')});await this.delay(this.reduced?130:620);if(this.destroyed)return;old?.remove();incoming.className='sr-image sr-image-current';this.current=incoming}
+ pan(delta){if(this.destroyed||!this.current||this.reduced)return;this.offset=Math.max(-32,Math.min(32,this.offset+delta));this.current.style.setProperty('--pan',`${this.offset}px`)}
+ preload(view){this.load(view).catch(()=>{})}
+ destroy(){this.destroyed=true;for(const timer of this.timers){clearTimeout(timer.id);timer.resolve()}this.timers.clear();this.cache.clear();this.layer.replaceChildren();this.current=null}
+}
