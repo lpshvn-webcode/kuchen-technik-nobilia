@@ -25,7 +25,7 @@ function loadStyles() {
   if (stylesPromise) return stylesPromise;
   stylesPromise = new Promise((resolve, reject) => {
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = 'showroom/showroom.css?v=20261008-design';
+    link.rel = 'stylesheet'; link.href = 'showroom/showroom.css?v=20261008-design2';
     link.onload = resolve;
     link.onerror = () => { stylesPromise = null; reject(new Error('Showroom styles unavailable')); };
     document.head.append(link);
@@ -59,8 +59,8 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
     <button class="sr-look sr-look-l" type="button" data-look="-1" aria-label="Осмотреть левее">${SIDE(-1)}</button>
     <button class="sr-look sr-look-r" type="button" data-look="1" aria-label="Осмотреть правее">${SIDE(1)}</button>
     <button class="sr-live" type="button" aria-pressed="false" hidden>${PEOPLE}<span>Оживить сцену</span></button>
+    <div class="sr-chip" ${chipOn ? '' : 'hidden'}><i></i>Нажмите на детали</div>
     <div class="sr-bottom">
-     <div class="sr-chip" ${chipOn ? '' : 'hidden'}><i></i>Нажмите на детали</div>
      <div class="sr-center"><button class="sr-go" type="button" data-go><span class="sr-go-text"><small>Дальше</small><strong></strong></span><span class="sr-go-icon"></span></button><div class="sr-hint" ${hintOn ? '' : 'hidden'}>${SWIPE}<span>Проведите, чтобы осмотреть</span></div></div>
      <div class="sr-nav">
       <button class="sr-nav-btn" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="sr-menu">${PIN}<span class="sr-nav-text"><small></small><strong></strong></span>${CHEVRON}</button>
@@ -287,7 +287,7 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
     tgt = tgt.got;
     vel.x = vel.y = 0;
     // phone: the camera zooms in on the detail first, then the sheet rises; desktop: both at once
-    if (mob && !reduced()) flyTo(tgt, 1150, easeIO, () => setTimeout(reveal, 120));
+    if (mob && !reduced()) { flyTo(tgt, 950, easeIO); setTimeout(reveal, 540); }
     else { flyTo(tgt, 1000, easeIO); requestAnimationFrame(reveal); }
     setShellState();
   }
