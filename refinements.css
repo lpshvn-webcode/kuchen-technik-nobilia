@@ -318,7 +318,7 @@
 
 @media(max-width:700px){
  .showroom-preview{width:100%}
- .showroom-preview-visual{aspect-ratio:4/5;min-height:min(74svh,690px);border-radius:0}
+ .showroom-preview-visual{width:100%;max-width:100%;aspect-ratio:4/5;min-height:min(74svh,690px);border-radius:0}
  .showroom-preview-visual:after{background:linear-gradient(0deg,#121713c7 0%,#12171338 42%,transparent 72%)}
  .showroom-preview-info{padding:24px 20px 22px;justify-content:flex-end;gap:22px}
  .showroom-preview-info>div:first-child{width:100%}

@@ -1,45 +1,129 @@
-const interactiveImage=(id,n)=>{const stem=`showroom/interactive/${id}-view-${String(n).padStart(2,'0')}`;return {desktop:`${stem}-desktop.webp`,mobile:`${stem}-desktop.webp`,fallbackDesktop:`${stem}-desktop.jpg`,fallbackMobile:`${stem}-desktop.jpg`}};
-const point=(x,y,mx=x,my=y)=>({desktop:{x,y},mobile:{x:mx,y:my}});
-const link=(id,direction,x=50,y=78,mx=x,my=y)=>({viewpointId:id,direction,position:point(x,y,mx,my)});
-const feature=(id,viewpointId,title,category,description,image,position,specs=[])=>({id,viewpointId,title,category,description,image,position,specs});
-function makePrepared(id,title,scenes,features){return {id,title,viewpoints:scenes.map((s,i)=>({id:`view-${i+1}`,title:s.title,image:interactiveImage(id,i+1),connections:s.connections})),hotspots:features}}
-const configs={
- lightminimal:makePrepared('lightminimal','Cadra 746',[
-  {title:'Общий вид',connections:[link('view-2','forward',55,78,51,74)]},
-  {title:'Перед островом',connections:[link('view-1','back',19,82,18,82),link('view-3','right',73,74,65,75)]},
-  {title:'Остров и рабочая зона',connections:[link('view-2','back',26,81,23,84),link('view-4','forward',62,68,58,74)]},
-  {title:'Материалы вблизи',connections:[link('view-3','back',23,84,24,85)]}
- ],[
-  feature('gold-sink','view-1','Золотая мойка','Фурнитура','Тёплый металлический акцент на светлом острове.','showroom/light-minimal-sink.jpg',point(57,62,54,60)),
-  feature('stone-worktop','view-2','Светлая столешница','Материалы','Спокойная светлая поверхность объединяет рабочие зоны.','showroom/light-minimal-worktop.jpg',point(50,65,52,61)),
-  feature('lit-niche','view-3','Подсвеченная ниша','Технологии','Мягкая подсветка выделяет фактуру камня и предметы в нише.','showroom/light-minimal-niche.jpg',point(55,35,50,30))
- ]),
- lightframe:makePrepared('lightframe','Nordic 793',[
-  {title:'Общий вид',connections:[link('view-2','left',35,76,42,75)]},
-  {title:'Вдоль острова',connections:[link('view-1','back',82,78,81,80),link('view-3','forward',60,70,52,75)]},
-  {title:'Рабочая зона',connections:[link('view-2','back',22,80,25,82)]}
- ],[
-  feature('frame-front','view-1','Рамочные фасады','Материалы','Светлый фасад с тонким профилем и тёплой фурнитурой.','showroom/light-frame-storage.jpg',point(56,47,60,43)),
-  feature('frame-handle','view-2','Металлическая ручка','Фурнитура','Небольшая ручка аккуратно подчёркивает геометрию фасада.','showroom/light-frame-storage.jpg',point(57,66,56,65)),
-  feature('frame-worktop','view-3','Рабочая поверхность','Материалы','Каменная фактура и продуманное рабочее освещение.','showroom/light-frame-worktop.jpg',point(55,62,52,58))
- ]),
- senso498:makePrepared('senso498','Senso 498',[
-  {title:'Общий вид',connections:[link('view-2','forward',54,75,53,78)]},
-  {title:'Перед рабочей зоной',connections:[link('view-1','back',18,81,20,82),link('view-3','right',72,72,68,74)]},
-  {title:'Мойка и столешница',connections:[link('view-2','back',22,81,23,82)]}
- ],[
-  feature('senso-front','view-1','Матовый фасад','Материалы','Глубокий шоколадный оттенок с мягкой матовой поверхностью.','showroom/senso-498-2.jpg',point(48,42,49,37)),
-  feature('senso-light','view-2','Контурная подсветка','Технологии','Световая линия подчёркивает край рабочей поверхности.','showroom/senso-498-3.jpg',point(56,61,51,58)),
-  feature('senso-sink','view-3','Золотая мойка','Фурнитура','Тёплый металл становится выразительной деталью интерьера.','showroom/senso-498-4.jpg',point(66,62,60,59))
- ]),
- structura:makePrepared('structura','Structura 419',[
-  {title:'Общий вид',connections:[link('view-2','forward',49,76,50,77)]},
-  {title:'Рабочая зона',connections:[link('view-1','back',18,80,18,82),link('view-3','right',70,71,64,74)]},
-  {title:'Фактура вблизи',connections:[link('view-2','back',25,83,23,84)]}
- ],[
-  feature('dark-oak','view-1','Тёмный дуб','Материалы','Выразительная древесная фактура тёмных фасадов.','showroom/structura-419-3.jpg',point(69,43,69,41)),
-  feature('dark-handle','view-2','Минималистичная ручка','Фурнитура','Лаконичная ручка сохраняет цельность плоскости фасада.','showroom/structura-419-2.jpg',point(56,69,54,66)),
-  feature('dark-stone','view-3','Каменная столешница','Материалы','Светлый камень создаёт баланс с тёмным дубом.','showroom/structura-419-4.jpg',point(55,55,53,51))
- ])
+import {META} from './assets-meta.js';
+
+// Coordinates are percentages of the photo (x from left, y from top).
+// pose: camera centre and zoom per device: [x, y, zoom].
+const P = (d, m = d) => ({d, m});
+const station = (id, title, photo, pose, caption) => ({id, title, photo, pose, caption});
+const spot = (id, photo, x, y, card) => ({id, photo, x, y, card});
+
+const S425 = 'showroom/structura-425/';
+const photo425 = (key, live) => ({
+  sd: {base: `${S425}${key}-sd`, formats: ['avif', 'webp']},
+  hd: {base: `${S425}${key}-hd`, formats: ['avif', 'webp']},
+  depth: {base: `${S425}${key}-depth`, formats: ['webp']},
+  live: live ? {base: `${S425}${key}-live-hd`, formats: ['avif', 'webp']} : null,
+  lqip: META[key].lqip, zmax: 2.3
+});
+const photoOld = (id, n) => {
+  const stem = `showroom/interactive/${id}-view-0${n}`;
+  return {
+    sd: {base: `${stem}-desktop`, formats: ['webp', 'jpg']}, hd: null,
+    depth: {base: `${stem}-depth`, formats: ['webp']}, live: null,
+    lqip: META[`${id}-view-0${n}`].lqip, zmax: 1.45
+  };
 };
-export function getShowroomConfig(id){return configs[id]||configs.lightminimal}
+const card = (title, category, text, image, specs = []) => ({title, category, text, image, specs});
+
+const structura425 = {
+  id: 'structura425',
+  title: 'Structura 425',
+  photos: {a: photo425('a', true), b: photo425('b', true)},
+  stations: [
+    station('overview', 'Общий вид', 'a', P([50, 52, 1]), 'Вся кухня целиком'),
+    station('island', 'Остров', 'a', P([50, 71, 1.9], [50, 68, 1.5]), 'Цельный мраморный объём'),
+    station('worktop', 'Рабочая зона', 'a', P([50, 45, 2.1], [51, 46, 1.6]), 'Мойка, фартук, верхние фасады'),
+    station('angle', 'Другой ракурс', 'b', P([52, 54, 1], [58, 56, 1]), 'Взгляд с левой стороны'),
+    station('appliances', 'Колонна с техникой', 'b', P([27, 52, 2.0], [27, 50, 1.55]), 'Духовые шкафы и ручки'),
+    station('pantry', 'Кладовая', 'b', P([82, 57, 2.0], [84, 55, 1.55]), 'Высокий шкаф с ящиками')
+  ],
+  hotspots: [
+    spot('a-island', 'a', 50, 67, 'island'),
+    spot('a-faucet', 'a', 50, 49.5, 'faucet'),
+    spot('a-oven', 'a', 21.4, 55, 'oven'),
+    spot('a-oak', 'a', 35.5, 41, 'oak'),
+    spot('a-upper', 'a', 55, 35, 'upper'),
+    spot('b-oven', 'b', 26.2, 53, 'oven'),
+    spot('b-handle', 'b', 34.2, 54, 'handle'),
+    spot('b-faucet', 'b', 63.5, 51, 'faucet'),
+    spot('b-island', 'b', 56, 68, 'island'),
+    spot('b-drawers', 'b', 73.6, 64, 'drawers'),
+    spot('b-pantry', 'b', 84, 58, 'pantry')
+  ],
+  cards: {
+    island: card('Мраморный остров', 'Материалы',
+      'Светлая поверхность с мягким золотистым прожилком объединяет столешницу и боковые панели в один монолитный объём.',
+      `${S425}d-island.webp`, [['Форма', 'Монолитный объём'], ['Оттенок', 'Светлый мрамор'], ['Акцент', 'Тёплые прожилки']]),
+    oak: card('Светлый дуб', 'Фасады',
+      'Вертикальный рисунок дерева и спокойный тёплый тон превращают высокие шкафы в цельную стену.',
+      `${S425}d-oak.webp`, [['Структура', 'Рисунок дерева'], ['Оттенок', 'Светлый дуб'], ['Эффект', 'Единая плоскость']]),
+    upper: card('Светлые верхние фасады', 'Фасады',
+      'Верхние шкафы без видимых ручек облегчают композицию и подчёркивают мраморный фартук.',
+      `${S425}d-upper.webp`, [['Решение', 'Без видимых ручек'], ['Оттенок', 'Тёплый белый'], ['Контраст', 'С дубом и камнем']]),
+    faucet: card('Смеситель и мойка', 'Фурнитура',
+      'Высокий смеситель в тёплом металле и аккуратная мойка поддерживают спокойный образ рабочей зоны.',
+      `${S425}d-faucet.webp`, [['Металл', 'Тёплый тон'], ['Фартук', 'Мраморный'], ['Зона', 'Мойка у стены']]),
+    oven: card('Встроенные духовые шкафы', 'Техника',
+      'Два чёрных прибора в колонне вписаны в дубовый фасад заподлицо и не нарушают цельность стены.',
+      `${S425}d-oven.webp`, [['Колонна', 'Два прибора'], ['Цвет', 'Чёрный'], ['Монтаж', 'Встроенный']]),
+    handle: card('Ручки-рейлинги', 'Фурнитура',
+      'Тёмная бронзовая ручка с мелким рифлением — тактильный акцент на светлом дубе.',
+      `${S425}d-handle.webp`, [['Металл', 'Тёмная бронза'], ['Фактура', 'Рифление'], ['Фасад', 'Светлый дуб']]),
+    drawers: card('Организация ящиков', 'Хранение',
+      'Деревянные вкладыши делят ящик на зоны для приборов и специй: всё под рукой и на своём месте.',
+      `${S425}d-drawers.webp`, [['Вкладыш', 'Светлое дерево'], ['Зоны', 'Приборы и специи'], ['Доступ', 'Всё под рукой']]),
+    pantry: card('Высокая кладовая', 'Хранение',
+      'Шкаф-пенал открывается в систему полок и выдвижных ящиков, где всё видно сразу.',
+      `${S425}d-pantry.webp`, [['Формат', 'Шкаф-пенал'], ['Внутри', 'Полки и ящики'], ['Доступ', 'Всё на виду']])
+  }
+};
+
+function legacy(id, title, views, spots, cards) {
+  return {
+    id, title,
+    photos: Object.fromEntries(views.map(([name], i) => [`v${i + 1}`, photoOld(id, i + 1)])),
+    stations: views.map(([name], i) => station(`view-${i + 1}`, name, `v${i + 1}`, P([50, 50, 1]), '')),
+    hotspots: spots.map(([photoKey, x, y, cardId]) => spot(`${photoKey}-${cardId}`, photoKey, x, y, cardId)),
+    cards
+  };
+}
+
+const lm = 'showroom/light-minimal-';
+const lightminimal = legacy('lightminimal', 'Cadra 746',
+  [['Общий вид'], ['Перед островом'], ['Остров и рабочая зона'], ['Материалы вблизи']],
+  [['v1', 55, 53, 'sink'], ['v2', 38, 32, 'niche'], ['v2', 50, 51, 'worktop'], ['v3', 44, 37, 'sink'], ['v3', 20, 35, 'worktop'], ['v4', 44, 46, 'sink'], ['v4', 30, 12, 'niche']],
+  {
+    sink: card('Золотая мойка', 'Фурнитура', 'Тёплый металлический акцент на светлом острове.', `${lm}sink.jpg`),
+    worktop: card('Светлая столешница', 'Материалы', 'Спокойная светлая поверхность объединяет рабочие зоны.', `${lm}worktop.jpg`),
+    niche: card('Подсвеченная ниша', 'Технологии', 'Мягкая подсветка выделяет фактуру камня и предметы в нише.', `${lm}niche.jpg`)
+  });
+
+const lf = 'showroom/light-frame-';
+const lightframe = legacy('lightframe', 'Nordic 793',
+  [['Общий вид'], ['Вдоль острова'], ['Рабочая зона']],
+  [['v1', 58, 67, 'front'], ['v2', 56, 64, 'handle'], ['v3', 55, 53, 'worktop'], ['v3', 62, 59, 'handle']],
+  {
+    front: card('Рамочные фасады', 'Материалы', 'Светлый фасад с тонким профилем и тёплой фурнитурой.', `${lf}storage.jpg`),
+    handle: card('Металлическая ручка', 'Фурнитура', 'Небольшая ручка аккуратно подчёркивает геометрию фасада.', `${lf}storage.jpg`),
+    worktop: card('Рабочая поверхность', 'Материалы', 'Каменная фактура и продуманное рабочее освещение.', `${lf}worktop.jpg`)
+  });
+
+const senso498 = legacy('senso498', 'Senso 498',
+  [['Общий вид'], ['Перед рабочей зоной'], ['Мойка и столешница']],
+  [['v1', 75, 52, 'front'], ['v2', 48, 22, 'front'], ['v2', 21, 63, 'light'], ['v3', 65, 60, 'sink']],
+  {
+    front: card('Матовый фасад', 'Материалы', 'Глубокий шоколадный оттенок с мягкой матовой поверхностью.', 'showroom/senso-498-2.jpg'),
+    light: card('Контурная подсветка', 'Технологии', 'Световая линия подчёркивает край рабочей поверхности.', 'showroom/senso-498-3.jpg'),
+    sink: card('Золотая мойка', 'Фурнитура', 'Тёплый металл становится выразительной деталью интерьера.', 'showroom/senso-498-4.jpg')
+  });
+
+const structura = legacy('structura', 'Structura 419',
+  [['Общий вид'], ['Рабочая зона'], ['Фактура вблизи']],
+  [['v1', 84, 30, 'oak'], ['v2', 56, 66, 'handle'], ['v3', 62, 32, 'stone']],
+  {
+    oak: card('Тёмный дуб', 'Материалы', 'Выразительная древесная фактура тёмных фасадов.', 'showroom/structura-419-3.jpg'),
+    handle: card('Минималистичная ручка', 'Фурнитура', 'Лаконичная ручка сохраняет цельность плоскости фасада.', 'showroom/structura-419-2.jpg'),
+    stone: card('Каменная столешница', 'Материалы', 'Светлый камень создаёт баланс с тёмным дубом.', 'showroom/structura-419-4.jpg')
+  });
+
+const configs = {structura425, lightminimal, lightframe, senso498, structura};
+export const getShowroomConfig = id => configs[id] || structura425;
