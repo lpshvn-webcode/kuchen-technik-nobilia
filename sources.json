@@ -56,10 +56,50 @@
   },
   {
     "id": "structura-425",
-    "source": "Official Nobilia photographs supplied by the client (showroom/source/structura-425/, 15 images, 5K)",
+    "source": "Official Nobilia photographs supplied by the client (showroom/source/structura-425/, 23 images, 5K)",
     "images": [
       "30606…30625_26_Structura_425_*.jpeg"
     ],
     "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia."
+  },
+  {
+    "id": "cadra-746",
+    "source": "Photographs supplied by the client (showroom/source/cadra-746/)",
+    "images": [
+      "cadra-746: official photos and generated variants"
+    ],
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia. Also includes client-supplied AI-generated variants (files named generated-*, *_AI) used as additional views."
+  },
+  {
+    "id": "nordic-793",
+    "source": "Photographs supplied by the client (showroom/source/nordic-793/)",
+    "images": [
+      "nordic-793: official photos and generated variants"
+    ],
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia. Also includes client-supplied AI-generated variants (files named generated-*, *_AI) used as additional views."
+  },
+  {
+    "id": "senso-499",
+    "source": "Photographs supplied by the client (showroom/source/senso-499/)",
+    "images": [
+      "senso-499: official photos"
+    ],
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia."
+  },
+  {
+    "id": "structura-409",
+    "source": "Photographs supplied by the client (showroom/source/structura-409/)",
+    "images": [
+      "structura-409: official photos and generated variants"
+    ],
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia. Also includes client-supplied AI-generated variants (files named generated-*, *_AI) used as additional views."
+  },
+  {
+    "id": "structura-419",
+    "source": "Photographs supplied by the client (showroom/source/structura-419/)",
+    "images": [
+      "structura-419: official photos and generated variants"
+    ],
+    "rights": "Official Nobilia imagery. Usage rights confirmed under the agreement between Küchen Technik and Nobilia. Also includes client-supplied AI-generated variants (files named generated-*, *_AI) used as additional views."
   }
 ]

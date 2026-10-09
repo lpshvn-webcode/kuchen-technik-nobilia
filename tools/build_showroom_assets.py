@@ -1,33 +1,86 @@
 #!/usr/bin/env python3
-"""Build web assets for the interactive showroom.
+"""Build web assets for the interactive showroom from showroom/source/<kitchen>/.
 
 Usage:
-    python3 tools/build_showroom_assets.py [--depth-model PATH]
+    python3 tools/build_showroom_assets.py [--depth-model PATH] [--only SLUG]
 
-Inputs : showroom/source/structura-425/*.jpeg (official 5K photos)
-         showroom/interactive/*-view-NN-desktop.webp (existing scenes)
-Outputs: showroom/structura-425/*      (AVIF/WebP scenes, depth maps, detail crops)
-         showroom/interactive/*-depth.webp (depth for existing scenes)
-         showroom/assets-meta.js       (sizes + tiny blurred placeholders)
+For every kitchen in KITCHENS it writes showroom/<slug>/:
+    a-sd/hd.{avif,webp}, b-sd/hd.{avif,webp}   base scenes (hd only for 5K sources)
+    a-live-hd.*, b-live-hd.*                    aligned variant (people / evening light)
+    a-depth.webp, b-depth.webp                  depth maps (need --depth-model)
+    d-<card>.webp                               detail card crops
+    cover.webp                                  catalogue cover
+and showroom/interactive/<id>-preview-*.{avif,webp,jpg} plus showroom/assets-meta.js.
 
-Depth maps are produced with MiDaS v2.1 small (ONNX):
+Depth maps use MiDaS v2.1 small (ONNX), not stored in the repository:
 https://github.com/isl-org/MiDaS/releases/download/v2_1/model-small.onnx
-The 66 MB model is not stored in the repository. Without --depth-model the
-existing depth files are kept as they are.
+Without --depth-model the existing depth files are kept.
 """
-import argparse, base64, io, json, os, sys
+import argparse, base64, io, json, sys
 from pathlib import Path
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / 'showroom/source/structura-425'
-OUT = ROOT / 'showroom/structura-425'
+SRCROOT = ROOT / 'showroom/source'
 INT = ROOT / 'showroom/interactive'
 META = {}
 
-
-def src(n):
-    return next(SRC.glob(f'{n}_*'))
+# photos: scene key -> source file (and optional aligned "live" variant)
+# cards:  card id -> (source file | 'photo:<key>', centre x, centre y, width fraction)
+# preview: (desktop centre x, y) and (mobile centre x, y, width fraction), taken from photo "a"
+KITCHENS = {
+    'structura-425': dict(
+        id='structura425',
+        photos={'a': dict(src='30606_26_Structura_425_M.jpeg', live='30611_26_Structura_425_P.jpeg'),
+                'b': dict(src='30607_26_Structura_425_M.jpeg', live='30614_26_Structura_425_P.jpeg')},
+        cards={'island': ('photo:a', .48, .74, .34), 'oak': ('photo:a', .35, .43, .22), 'upper': ('photo:a', .58, .39, .30),
+               'faucet': ('photo:b', .64, .50, .20), 'oven': ('photo:b', .265, .53, .20),
+               'handle': ('30753_26_Structura_425_D.jpeg', .5, .6, 1.0), 'drawers': ('30751_26_Structura_425_D.jpeg', .5, .5, 1.0),
+               'pantry': ('30750_26_Structura_425_D.jpeg', .5, .45, 1.0)},
+        preview=((.50, .53), (.50, .57, .40))),
+    'cadra-746': dict(
+        id='cadra746',
+        photos={'a': dict(src='30462_26_Cadra_746_M.jpeg'), 'b': dict(src='30464_26_Cadra_746_M.jpeg')},
+        cards={'niche': ('30472_26_Cadra_746_D.jpeg', .5, .38, 1.0), 'faucet': ('30471_26_Cadra_746_D.jpeg', .5, .55, 1.0),
+               'island': ('30465_26_Cadra_746_D.jpeg', .5, .55, 1.0), 'worktop': ('30473_26_Cadra_746_D.jpeg', .5, .25, 1.0),
+               'oven': ('photo:b', .76, .47, .20), 'drawers': ('30474_26_Cadra_746_D.jpeg', .5, .62, 1.0),
+               'fronts': ('30470_26_Cadra_746_D.jpeg', .5, .5, 1.0)},
+        preview=((.50, .56), (.48, .58, .45))),
+    'nordic-793': dict(
+        id='nordic793',
+        photos={'a': dict(src='30439_26_Nordic_793_M.jpeg', live='30439_26_Nordic_793_P_AI.jpeg'),
+                'b': dict(src='30441_26_Nordic_793_M.jpeg', live='30441_26_Nordic_793_P_AI.jpeg')},
+        cards={'sink': ('30445_26_Nordic_793_D.jpeg', .5, .4, 1.0), 'shelf': ('30444_26_Nordic_793_D.jpeg', .5, .35, 1.0),
+               'worktop': ('30456_26_Nordic_793_D.jpeg', .5, .45, 1.0), 'fronts': ('30454_26_Nordic_793_D.jpeg', .5, .5, .9),
+               'handle': ('30455_26_Nordic_793_D.jpeg', .5, .55, 1.0), 'island': ('30443_26_Nordic_793_D.jpeg', .5, .7, 1.0),
+               'tall': ('30442_26_Nordic_793_D.jpeg', .5, .6, 1.0)},
+        preview=((.50, .56), (.58, .60, .45))),
+    'senso-499': dict(
+        id='senso499',
+        photos={'a': dict(src='30649_26_Senso_499_M.jpeg', live='30666_26_Senso_499_P.jpeg'),
+                'b': dict(src='30650_26_Senso_499_D.jpeg', live='30669_26_Senso_499_P.jpeg')},
+        cards={'vitrine': ('30664_26_Senso_499_D.jpeg', .5, .5, .95), 'faucet': ('30660_26_Senso_499_D.jpeg', .5, .45, 1.0),
+               'island': ('30659_26_Senso_499_D.jpeg', .5, .45, 1.0), 'handle': ('30658_26_Senso_499_D.jpeg', .5, .35, 1.0),
+               'pullout': ('30661_26_Senso_499_D.jpeg', .5, .6, 1.0), 'lift': ('30663_26_Senso_499_D.jpeg', .5, .5, .9),
+               'bar': ('30656_26_Senso_499_D.jpeg', .5, .4, 1.0), 'hob': ('30654_26_Senso_499_D.jpeg', .5, .25, 1.0)},
+        preview=((.50, .55), (.45, .58, .42))),
+    'structura-409': dict(
+        id='structura409',
+        photos={'a': dict(src='30724_26_Structura_409_M.jpeg', live='generated-10.png')},
+        cards={'vitrine': ('30726_26_Structura_409_D.jpeg', .5, .4, 1.0), 'ovens': ('generated-03.png', .5, .5, 1.0),
+               'sink': ('30728_26_Structura_409_D.jpeg', .5, .3, 1.0), 'island': ('30732_26_Structura_409_D.jpeg', .5, .6, 1.0),
+               'fronts': ('30729_26_Structura_409_D.jpeg', .5, .5, 1.0),
+               'hob': ('generated-07.png', .5, .5, 1.0), 'bar': ('30730_26_Structura_409_D.jpeg', .5, .4, 1.0)},
+        preview=((.50, .55), (.42, .58, .45))),
+    'structura-419': dict(
+        id='structura419',
+        photos={'a': dict(src='view-01-wide.jpg'), 'b': dict(src='generated-08.png')},
+        cards={'knob': ('view-02-detail.jpg', .5, .45, 1.0),
+               'cooktop': ('view-05-cooktop.jpg', .5, .45, 1.0), 'tall': ('view-06-tall-units.jpg', .5, .35, 1.0),
+               'sink': ('generated-09.png', .5, .5, 1.0), 'shelf': ('generated-04.png', .5, .5, 1.0),
+               'oven': ('generated-10.png', .5, .5, 1.0)},
+        preview=((.50, .54), (.42, .56, .45))),
+}
 
 
 def save(img, path, fmt, **kw):
@@ -44,60 +97,60 @@ def lqip(img):
     return 'data:image/jpeg;base64,' + base64.b64encode(b.getvalue()).decode()
 
 
-def scene_set(key, photo, widths, avif_q=55, webp_q=76):
-    im = Image.open(photo).convert('RGB')
-    total = 0
-    for tag, w in widths.items():
-        r = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
-        total += save(r, OUT / f'{key}-{tag}.avif', 'AVIF', quality=avif_q, speed=4)
-        total += save(r, OUT / f'{key}-{tag}.webp', 'WEBP', quality=webp_q, method=5)
-    META[key] = {'w': im.width, 'h': im.height, 'lqip': lqip(im)}
-    print(f'{key}: {total // 1024} KB (all formats)')
-    return im
-
-
 def crop(im, cx, cy, wfrac, aspect=4 / 3):
-    w = im.width * wfrac
+    w = min(im.width * wfrac, im.height * aspect)
     h = w / aspect
     x0 = min(max(cx * im.width - w / 2, 0), im.width - w)
     y0 = min(max(cy * im.height - h / 2, 0), im.height - h)
     return im.crop((round(x0), round(y0), round(x0 + w), round(y0 + h)))
 
 
-def details(a, b):
-    d30610 = Image.open(src(30610)).convert('RGB')
-    d30609 = Image.open(src(30609)).convert('RGB')
-    d30625 = Image.open(src(30625)).convert('RGB')
-    specs = {
-        'island': crop(a, .48, .74, .34),
-        'oak': crop(a, .35, .43, .22),
-        'upper': crop(a, .58, .39, .30),
-        'faucet': crop(b, .64, .50, .20),
-        'oven': crop(b, .265, .53, .20),
-        'handle': crop(d30610, .88, .50, .24),
-        'drawers': crop(d30609, .55, .50, .88),
-        'pantry': crop(d30625, .62, .38, .95),
-    }
-    for name, c in specs.items():
-        r = c.resize((1000, 750), Image.LANCZOS)
-        size = save(r, OUT / f'd-{name}.webp', 'WEBP', quality=78, method=5)
-        print(f'd-{name}: {size // 1024} KB')
+def scene(out, key, src, live=None):
+    im = Image.open(src).convert('RGB')
+    hd = im.width >= 3000
+    sizes = {'sd': 1800, 'hd': 3400} if hd else {'sd': im.width}
+    total = 0
+    for tag, w in sizes.items():
+        r = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS) if w != im.width else im
+        q = 55 if hd else 62
+        total += save(r, out / f'{key}-{tag}.avif', 'AVIF', quality=q, speed=4)
+        total += save(r, out / f'{key}-{tag}.webp', 'WEBP', quality=76, method=5)
+    if live:
+        lv = Image.open(live).convert('RGB')
+        w = 3400 if lv.width >= 3000 else lv.width
+        r = lv.resize((w, round(lv.height * w / lv.width)), Image.LANCZOS) if w != lv.width else lv
+        total += save(r, out / f'{key}-live-hd.avif', 'AVIF', quality=55 if hd else 62, speed=4)
+        total += save(r, out / f'{key}-live-hd.webp', 'WEBP', quality=76, method=5)
+    print(f'  {key}: {total // 1024} KB (all formats){" +live" if live else ""}')
+    return im, {'w': im.width, 'h': im.height, 'lqip': lqip(im), 'hd': hd, 'live': bool(live)}
 
 
-def previews(a):
-    for tag, (w, h, cx, cy, fw) in {
-        'desktop': (1200, 720, .50, .53, 1.0),
-        'mobile': (720, 900, .50, .57, .40),
-    }.items():
+def build(slug, cfg, depth_jobs):
+    src = SRCROOT / slug
+    out = ROOT / 'showroom' / slug
+    print(slug)
+    ims = {}
+    for key, p in cfg['photos'].items():
+        im, meta = scene(out, key, src / p['src'], src / p['live'] if p.get('live') else None)
+        ims[key] = im
+        META[f'{slug}/{key}'] = meta
+        depth_jobs.append((src / p['src'], out / f'{key}-depth.webp'))
+    for name, (file, cx, cy, wf) in cfg['cards'].items():
+        im = ims[file[6:]] if file.startswith('photo:') else Image.open(src / file).convert('RGB')
+        c = crop(im, cx, cy, wf).resize((1000, 750), Image.LANCZOS)
+        save(c, out / f'd-{name}.webp', 'WEBP', quality=78, method=5)
+    a = ims['a']
+    (dx, dy), (mx, my, mw) = cfg['preview']
+    for tag, (w, h, cx, cy, fw) in {'desktop': (1200, 720, dx, dy, 1.0), 'mobile': (720, 900, mx, my, mw)}.items():
         c = crop(a, cx, cy, fw, aspect=w / h).resize((w, h), Image.LANCZOS)
-        save(c, INT / f'structura425-preview-{tag}.avif', 'AVIF', quality=52, speed=4)
-        save(c, INT / f'structura425-preview-{tag}.webp', 'WEBP', quality=76, method=5)
-        save(c, INT / f'structura425-preview-{tag}.jpg', 'JPEG', quality=80, optimize=True, progressive=True)
+        save(c, INT / f"{cfg['id']}-preview-{tag}.avif", 'AVIF', quality=52, speed=4)
+        save(c, INT / f"{cfg['id']}-preview-{tag}.webp", 'WEBP', quality=76, method=5)
+        save(c, INT / f"{cfg['id']}-preview-{tag}.jpg", 'JPEG', quality=80, optimize=True, progressive=True)
     cover = crop(a, .5, .55, 1.0, aspect=1000 / 730).resize((1000, 730), Image.LANCZOS)
-    print('cover:', save(cover, OUT / 'cover.webp', 'WEBP', quality=78, method=5) // 1024, 'KB')
+    save(cover, out / 'cover.webp', 'WEBP', quality=78, method=5)
 
 
-def make_depth(model_path):
+def make_depth(model_path, jobs):
     import numpy as np, onnxruntime as ort, cv2
     sess = ort.InferenceSession(model_path)
 
@@ -109,7 +162,7 @@ def make_depth(model_path):
         return box(a) * I + box(b)
 
     def depth(img_path, out_path, size=1400):
-        im = cv2.imread(str(img_path))
+        im = cv2.imdecode(np.fromfile(str(img_path), np.uint8), cv2.IMREAD_COLOR)
         h, w = im.shape[:2]
         s = size / max(h, w)
         im = cv2.resize(im, (int(w * s), int(h * s)), interpolation=cv2.INTER_AREA)
@@ -130,36 +183,27 @@ def make_depth(model_path):
         g = cv2.GaussianBlur(g, (0, 0), 1.2)
         Image.fromarray((np.clip(g, 0, 1) * 255).astype(np.uint8)).save(out_path, 'WEBP', quality=82, method=5)
 
-    for key, name in (('a', '30606'), ('b', '30607')):
-        depth(src(name), OUT / f'{key}-depth.webp')
-    for f in sorted(INT.glob('*-view-*-desktop.webp')):
-        depth(f, f.with_name(f.name.replace('-desktop.webp', '-depth.webp')))
-    print('depth maps done')
-
-
-def old_meta():
-    for f in sorted(INT.glob('*-view-*-desktop.webp')):
-        im = Image.open(f).convert('RGB')
-        META[f.name.replace('-desktop.webp', '')] = {'w': im.width, 'h': im.height, 'lqip': lqip(im)}
+    for img, out in jobs:
+        depth(img, out)
+        print('  depth', out.relative_to(ROOT))
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--depth-model')
+    ap.add_argument('--only')
     args = ap.parse_args()
-    OUT.mkdir(parents=True, exist_ok=True)
-    wide = {'sd': 1800, 'hd': 3400}
-    a = scene_set('a', src(30606), wide)
-    b = scene_set('b', src(30607), wide)
-    scene_set('a-live', src(30611), {'hd': 3400})
-    scene_set('b-live', src(30614), {'hd': 3400})
-    details(a, b)
-    previews(a)
+    jobs = []
+    old = ROOT / 'showroom/assets-meta.js'
+    if args.only and old.exists():
+        META.update(json.loads(old.read_text(encoding='utf-8')[len('export const META='):].rstrip().rstrip(';')))
+    for slug, cfg in KITCHENS.items():
+        if args.only and slug != args.only:
+            continue
+        build(slug, cfg, jobs)
     if args.depth_model:
-        make_depth(args.depth_model)
-    old_meta()
-    (ROOT / 'showroom/assets-meta.js').write_text(
-        'export const META=' + json.dumps(META, separators=(',', ':')) + ';\n')
+        make_depth(args.depth_model, jobs)
+    (ROOT / 'showroom/assets-meta.js').write_text('export const META=' + json.dumps(META, separators=(',', ':')) + ';\n')
     print('meta written')
 
 
