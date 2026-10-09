@@ -25,7 +25,7 @@ function loadStyles() {
   if (stylesPromise) return stylesPromise;
   stylesPromise = new Promise((resolve, reject) => {
     const link = document.createElement('link');
-    link.rel = 'stylesheet'; link.href = 'showroom/showroom.css?v=20261008-design2';
+    link.rel = 'stylesheet'; link.href = 'showroom/showroom.css?v=20261009-kitchens';
     link.onload = resolve;
     link.onerror = () => { stylesPromise = null; reject(new Error('Showroom styles unavailable')); };
     document.head.append(link);
@@ -58,7 +58,7 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
    <div class="sr-hud">
     <button class="sr-look sr-look-l" type="button" data-look="-1" aria-label="Осмотреть левее">${SIDE(-1)}</button>
     <button class="sr-look sr-look-r" type="button" data-look="1" aria-label="Осмотреть правее">${SIDE(1)}</button>
-    <button class="sr-live" type="button" aria-pressed="false" hidden>${PEOPLE}<span>Оживить сцену</span></button>
+    <button class="sr-live" type="button" aria-pressed="false" hidden>${PEOPLE}<span>${cfg.liveLabels.on}</span></button>
     <div class="sr-chip" ${chipOn ? '' : 'hidden'}><i></i>Нажмите на детали</div>
     <div class="sr-bottom">
      <div class="sr-center"><button class="sr-go" type="button" data-go><span class="sr-go-text"><small>Дальше</small><strong></strong></span><span class="sr-go-icon"></span></button><div class="sr-hint" ${hintOn ? '' : 'hidden'}>${SWIPE}<span>Проведите, чтобы осмотреть</span></div></div>
@@ -314,7 +314,7 @@ export async function mountShowroom({host, modelId, analytics, onClose}) {
       if (closed) return;
       liveOn = next; const entry = cur, from = entry.liveAlpha, to = liveOn ? 1 : 0, t0 = performance.now(), dur = reduced() ? 200 : 1300;
       await new Promise(resolve => { const tick = now => { const t = clamp((now - t0) / dur, 0, 1); entry.liveAlpha = lerp(from, to, easeIO(t)); if (t < 1 && !closed) requestAnimationFrame(tick); else resolve(); }; requestAnimationFrame(tick); });
-      liveBtn.setAttribute('aria-pressed', String(liveOn)); liveBtn.querySelector('span').textContent = liveOn ? 'Без людей' : 'Оживить сцену';
+      liveBtn.setAttribute('aria-pressed', String(liveOn)); liveBtn.querySelector('span').textContent = liveOn ? cfg.liveLabels.off : cfg.liveLabels.on;
       ev('showroom_live_toggle', {enabled: liveOn});
     } catch (error) { console.error(error); ev('showroom_error', {reason: 'live_image'}); }
     finally { liveBusy = false; liveBtn.classList.remove('sr-pending'); }

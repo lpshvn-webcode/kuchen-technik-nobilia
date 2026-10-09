@@ -10,10 +10,11 @@ $('.menu-toggle').onclick=()=>{showDialog($('#mobile-menu'));$('.menu-toggle').s
 $$('#mobile-menu a').forEach(a=>a.onclick=()=>$('#mobile-menu').close());
 const models=[
  {id:'structura425',name:'STRUCTURA 425',image:'showroom/structura-425/cover.webp',title:'Светлый дуб и мрамор',preview:true},
- {id:'lightminimal',name:'CADRA 746',image:'light-minimal.jpg',title:'Светлый камень и золотые акценты',preview:true},
- {id:'lightframe',name:'NORDIC 793',image:'light-frame.jpg',title:'Рамочные фасады и тёплый металл',preview:true},
- {id:'senso498',name:'SENSO 498',image:'senso-498.jpg',title:'Тёплый шоколадный матовый',preview:true},
- {id:'structura',name:'STRUCTURA 419',image:'structura.jpeg',title:'Тёмный дуб и камень',preview:true}
+ {id:'cadra746',name:'CADRA 746',image:'showroom/cadra-746/cover.webp',title:'Светлый камень и золотые акценты',preview:true},
+ {id:'nordic793',name:'NORDIC 793',image:'showroom/nordic-793/cover.webp',title:'Кремовые рамки и тёплая медь',preview:true},
+ {id:'senso499',name:'SENSO 499',image:'showroom/senso-499/cover.webp',title:'Тёмное дерево и светлый камень',preview:true},
+ {id:'structura409',name:'STRUCTURA 409',image:'showroom/structura-409/cover.webp',title:'Тёмное дерево и бежевый остров',preview:true},
+ {id:'structura419',name:'STRUCTURA 419',image:'showroom/structura-419/cover.webp',title:'Тёмный дуб и камень',preview:true}
 ];
 window.collections=models;
 const modelImage=m=>m.image||m.id+'.webp';
@@ -31,7 +32,7 @@ function selectShowroom(id,scroll=false){const model=models.find(m=>m.id===id);i
 previewImage(showroomModel);
 document.addEventListener('click',e=>{const card=e.target.closest('[data-showroom-model]');if(card&&!card.hasAttribute('aria-hidden'))selectShowroom(card.dataset.showroomModel,true);const select=e.target.closest('[data-showroom-select]');if(select)selectShowroom(select.dataset.showroomSelect)});
 let activeShowroom=null,showroomOpening=false;
-async function openShowroom(){if(showroomOpening||activeShowroom)return;showroomOpening=true;showroomEvent('showroom_open_click');showroomEvent('showroom_loading');$('#showroom-error').hidden=true;$('#showroom-loader').hidden=false;$('#showroom-open').disabled=true;try{const {mountShowroom}=await import('./showroom/showroom.js?v=20261008-design2');activeShowroom=await mountShowroom({host:$('#showroom-host'),preview:$('#showroom-preview'),modelId:showroomModel.id,analytics:showroomEvent,onClose:()=>{activeShowroom=null;$('#showroom-host').hidden=true;$('#showroom-loader').hidden=true;$('#showroom-open').disabled=false}});$('#showroom-loader').hidden=true;showroomEvent('showroom_loaded')}catch(error){console.error('Showroom failed to open',error);showroomEvent('showroom_error');$('#showroom-error').hidden=false;$('#showroom-loader').hidden=true;$('#showroom-open').disabled=false}finally{showroomOpening=false}}
+async function openShowroom(){if(showroomOpening||activeShowroom)return;showroomOpening=true;showroomEvent('showroom_open_click');showroomEvent('showroom_loading');$('#showroom-error').hidden=true;$('#showroom-loader').hidden=false;$('#showroom-open').disabled=true;try{const {mountShowroom}=await import('./showroom/showroom.js?v=20261009-kitchens');activeShowroom=await mountShowroom({host:$('#showroom-host'),preview:$('#showroom-preview'),modelId:showroomModel.id,analytics:showroomEvent,onClose:()=>{activeShowroom=null;$('#showroom-host').hidden=true;$('#showroom-loader').hidden=true;$('#showroom-open').disabled=false}});$('#showroom-loader').hidden=true;showroomEvent('showroom_loaded')}catch(error){console.error('Showroom failed to open',error);showroomEvent('showroom_error');$('#showroom-error').hidden=false;$('#showroom-loader').hidden=true;$('#showroom-open').disabled=false}finally{showroomOpening=false}}
 $('#showroom-open').addEventListener('click',openShowroom);$('#showroom-retry').addEventListener('click',openShowroom);
 const previewObserver=new IntersectionObserver((entries)=>{if(entries.some(entry=>entry.isIntersecting)){showroomEvent('showroom_preview_view');previewObserver.disconnect()}},{threshold:.3});previewObserver.observe($('#showroom-preview'));
 const state={model:null,configuration:null,source:'contact',type:'estimate',interest:null};
